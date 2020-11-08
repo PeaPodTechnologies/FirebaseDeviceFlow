@@ -1,15 +1,12 @@
 {
-  "name": "firebasedeviceflow",
-  "version": "1.0.0",
-  "description": "OAuth2 'Device Flow' authentication with several providers for Node.JS CLI applications with Firebase.",
+  "name": "@openformtech/firebasedeviceflow",
+  "version": "0.1.1",
+  "description": "Firebase authentication via OAuth2 'Device Flow' for Node.js CLI applications on limited input devices (i.e. IoT).",
   "main": "FirebaseDeviceFlow.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/OpenFormTech/FirebaseDeviceFlow.git"
-  },
+  "repository": "git://github.com/openformtech/firebasedeviceflow.git",
   "keywords": [
     "oauth2",
     "auth",
@@ -18,7 +15,10 @@
     "flow",
     "iot"
   ],
-  "author": "JLefebvre55",
+  "author": {
+    "name": "JLefebvre55",
+    "email": "jayden.lefebvre55@gmail.com"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/OpenFormTech/FirebaseDeviceFlow/issues"
@@ -30,5 +30,9 @@
     "firebase": "^8.0.0",
     "inquirer": "^7.3.3",
     "ora": "^5.1.0"
-  }
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "devDependencies": {}
 }
