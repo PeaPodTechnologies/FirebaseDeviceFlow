@@ -6,6 +6,10 @@ Firebase authentication via [OAuth2 'Device Flow'](https://www.oauth.com/oauth2-
 - GitHub [(Docs)](https://docs.github.com/en/free-pro-team@latest/developers/apps/authorizing-oauth-apps#device-flow)
 - Google [(Docs)](https://developers.google.com/identity/protocols/oauth2/limited-input-device)
 
+## Example Usage
+
+
+
 # Development
 
 ## Requirements
