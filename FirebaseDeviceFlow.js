@@ -199,4 +199,4 @@ DeviceFlowManager.Providers = {
     'GitHub' : GitHubDeviceFlow
 }
 
-module.exports = DeviceFlowManager;
+module.exports = DeviceFlowManager.Providers;
