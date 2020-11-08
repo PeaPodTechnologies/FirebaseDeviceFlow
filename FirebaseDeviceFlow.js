@@ -117,10 +117,13 @@ class GoogleDeviceFlow extends DeviceFlowManager {
     * @returns {Promise<Object>} The response.
     */
     async authorizationRequest(clientid, scopes){
-        return super.authorizationRequest(this.openid.device_authorization_endpoint, {
+        let auth = await super.authorizationRequest(this.openid.device_authorization_endpoint, {
             'client_id':clientid, 
             'scope':scopes.join(" ").toLowerCase()
         });
+        auth.url = auth.verification_url;
+        auth.code = auth.user_code;
+        return auth;
     }
     /**
     * Polls the Google OAuth token endpoint for the access token until the user completes the authorization step.
@@ -158,10 +161,13 @@ class GitHubDeviceFlow extends DeviceFlowManager {
     * @returns {Promise<Object>} The response.
     */
     async authorizationRequest(clientid, scopes){
-        return super.authorizationRequest('https://github.com/login/device/code', {
+        let auth = await super.authorizationRequest('https://github.com/login/device/code', {
             'client_id':clientid, 
             'scope':scopes.join(" ").toLowerCase()
         });
+        auth.url = auth.verification_uri;
+        auth.code = auth.user_code;
+        return auth;
     }
     /**
     * Polls the Github OAuth token endpoint for the access token until the user completes the authorization step.
