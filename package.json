@@ -26,10 +26,16 @@
   "homepage": "https://github.com/OpenFormTech/FirebaseDeviceFlow#readme",
   "dependencies": {
     "axios": "^0.21.0",
-    "firebase": "^8.0.0"
+    "firebase": "^8.0.0",
+    "inquirer": "^7.3.3",
+    "n": "^6.7.0",
+    "ora": "^5.1.0"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@babel/core": "^7.12.3",
+    "@babel/preset-env": "^7.12.1"
+  }
 }
