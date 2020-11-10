@@ -268,11 +268,11 @@ class DeviceFlowUI {
     * Constructs a Firebase Device Flow UI instance with OAuth settings. See `Providers` for the individual provider requirements.
     * @param {firebase.default.app.App} app The initialized Firebase app.
     * @param {Object} config The set of config objects for each provider.
-    * @param {Object} config.Google The Google config object.
+    * @param {Object} config.Google The Google config object. Leave `undefined` to disable this provider.
     * @param {String} config.Google.clientid The "TVs and Limited Input devices" OAuth 2.0 Client ID generated via the [GCP Console](https://console.developers.google.com/apis/credentials).
     * @param {String} config.Google.clientsecret The "TVs and Limited Input devices" OAuth 2.0 Client Secret generated via the [GCP Console](https://console.developers.google.com/apis/credentials).
     * @param {String[]} config.Google.scopes The scopes this token requires, from (this list)[https://developers.google.com/identity/protocols/oauth2/limited-input-device#allowedscopes].
-    * @param {Object} config.GitHub The GitHub config object.
+    * @param {Object} config.GitHub The GitHub config object. Leave `undefined` to disable this provider.
     * @param {String} config.GitHub.clientid The OAuth App Client ID generated via the [GitHub Developer settings panel](https://github.com/settings/developers).
     * @param {String} config.GitHub.clientsecret Unused.
     * @param {String[]} config.GitHub.scopes The scopes this token requires, from (this list)[https://docs.github.com/en/free-pro-team/developers/apps/scopes-for-oauth-apps].
@@ -281,7 +281,7 @@ class DeviceFlowUI {
     constructor(app, config, loadingSpinner = defaultSpinner){
         this.app = app;
         this.loadingSpinner = loadingSpinner;
-        this.config = config;
+        this.config = Object.fromEntries(Object.entries(config).filter(provider=>{Object.keys(Providers).includes(provider[0]);}));
     }
     /**
     * Signs the user in to your app.
@@ -295,7 +295,7 @@ class DeviceFlowUI {
                     type: 'list',
                     name: 'provider',
                     message: 'Sign in via:',
-                    choices: Object.keys(Providers),
+                    choices: Object.keys(this.config),
                 }
             ])).provider;
             await this.signInViaProvider(new Providers[provider]());
