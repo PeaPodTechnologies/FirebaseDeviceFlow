@@ -263,8 +263,10 @@ const defaultSpinner = {
 class DeviceFlowUI {
     loadingSpinner;
     config;
+    app;
     /**
     * Constructs a Firebase Device Flow UI instance with OAuth settings. See `Providers` for the individual provider requirements.
+    * @param {firebase.default.app.App} app The initialized Firebase app.
     * @param {Object} config The set of config objects for each provider.
     * @param {Object} config.Google The Google config object.
     * @param {String} config.Google.clientid The "TVs and Limited Input devices" OAuth 2.0 Client ID generated via the [GCP Console](https://console.developers.google.com/apis/credentials).
@@ -276,7 +278,8 @@ class DeviceFlowUI {
     * @param {String[]} config.GitHub.scopes The scopes this token requires, from (this list)[https://docs.github.com/en/free-pro-team/developers/apps/scopes-for-oauth-apps].
     * @param {ora.Spinner} loadingSpinner The `ora` spinner object (see the [`ora` spinner documentation](https://www.npmjs.com/package/ora#spinner) for details).
     */
-    constructor(config, loadingSpinner = defaultSpinner){
+    constructor(app, config, loadingSpinner = defaultSpinner){
+        this.app = app;
         this.loadingSpinner = loadingSpinner;
         this.config = config;
     }
@@ -285,7 +288,7 @@ class DeviceFlowUI {
     * @returns {Promise<firebase.default.auth.UserCredential>} The user.
     **/
     async signIn(){
-        while(firebase.auth().currentUser === null){
+        while(this.app.auth().currentUser === null){
             //Select provider
             const provider = (await inquirer.prompt([
                 {
@@ -297,7 +300,7 @@ class DeviceFlowUI {
             ])).provider;
             await this.signInViaProvider(new Providers[provider]());
         }
-        return firebase.auth().currentUser;
+        return this.app.auth().currentUser;
     }
     
     /**
@@ -363,7 +366,7 @@ class DeviceFlowUI {
                 spinner: this.loadingSpinner,
             }).start();
             
-            const user = await firebase.auth().signInWithCredential(provider.firebaseCredential(tokenResponse));
+            const user = await this.app.auth().signInWithCredential(provider.firebaseCredential(tokenResponse));
             
             if(user.additionalUserInfo.profile.name == undefined){
                 loading.succeed('Authenticated Successfully!');
@@ -388,7 +391,7 @@ class DeviceFlowUI {
     /**
     * Links a new credential to an existing account.
     * @param {String} email The account's email, by which the default existing method is fetched.
-    * @param {firebase.auth.AuthCredential} newCred The new credential.
+    * @param {firebase.default.auth.AuthCredential} newCred The new credential.
     * @return {Promise<firebase.default.auth.UserCredential>} The user, now associated with both credentials.
     */
     async linkCredToExisting(email, newCred){
@@ -400,7 +403,7 @@ class DeviceFlowUI {
         var loading;
         
         //It's implied this works
-        var defaultMethod = providerIDToName[(await firebase.auth().fetchSignInMethodsForEmail(email))[0]];
+        var defaultMethod = providerIDToName[(await this.app.auth().fetchSignInMethodsForEmail(email))[0]];
         var link = (await inquirer.prompt([
             {
                 type: 'list',

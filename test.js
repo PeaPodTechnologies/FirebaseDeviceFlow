@@ -2,11 +2,11 @@
 const firebase = require('firebase/app');
 const fdf = require('./FirebaseDeviceFlow');
 
-firebase.initializeApp({
+const app = firebase.initializeApp({
     // Firebase App Config Object
 });
 
-const ui = new fdf.DeviceFlowUI({
+const ui = new fdf.DeviceFlowUI(app, {
     Google : {
         scopes : ['scope'],
         clientid : 'clientid',
