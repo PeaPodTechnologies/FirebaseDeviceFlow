@@ -1,6 +1,6 @@
 {
   "name": "@openformtech/firebasedeviceflow",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "Firebase authentication via OAuth2 'Device Flow' for Node.js CLI applications on limited input devices (i.e. IoT).",
   "main": "FirebaseDeviceFlow.js",
   "scripts": {
