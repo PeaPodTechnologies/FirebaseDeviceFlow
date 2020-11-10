@@ -281,7 +281,10 @@ class DeviceFlowUI {
     constructor(app, config, loadingSpinner = defaultSpinner){
         this.app = app;
         this.loadingSpinner = loadingSpinner;
-        this.config = Object.fromEntries(Object.entries(config).filter(provider=>{Object.keys(Providers).includes(provider[0]);}));
+        this.config = Object.fromEntries(Object.entries(config).filter(provider=>{return Object.keys(Providers).includes(provider[0]);}));
+        if(Object.keys(this.config).length < 1){
+            throw new Error("Invalid config - no providers recognized! Names are case sensitive.");
+        }    
     }
     /**
     * Signs the user in to your app.
