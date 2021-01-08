@@ -30,6 +30,6 @@ Refer to Google's ["OAuth 2.0 for TV and Limited-Input Device Applications" Docu
 
 ## Todo
 
-- [] Improve error code reaction per-provider
-- [] Add more providers?
+- [ ] 'Slow down' error code handling
+- [ ] Add more providers?
 - ...

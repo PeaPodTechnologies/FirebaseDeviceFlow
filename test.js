@@ -7,19 +7,28 @@ const app = firebase.initializeApp({
 });
 
 const ui = new fdf.DeviceFlowUI(app, {
-    Google : {
-        scopes : ['scope'],
-        clientid : 'clientid',
-        clientsecret : 'clientsecret'
-    },
-    GitHub : {
-        clientid : 'clientid',
-        scopes : ['scope']
-    }
+    //FDF Config Object
 });
 
+/**
+ * Example FDF Config Object:
+ * 
+ * - Provider is a key, one of Google, GitHub, etc.
+ * - Scopes are a list of scope strings (defined by the provider's API)
+ * - Client ID and client secret are provided by the providers
+ * 
+ * {
+ *   Provider1 : {
+ *     scopes : ['scope'],
+ *     clientid : 'clientid',
+ *     clientsecret : 'clientsecret'
+ *   },
+ *   Provider2 : ...
+ * }
+ */
+
 ui.signIn().then(user=>{
-    //Do what you want
+    //Do what you want!
 }, err=>{
     console.log(err);
 });
