@@ -1,6 +1,6 @@
 {
   "name": "@openformtech/firebasedeviceflow",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Firebase authentication via OAuth2 'Device Flow' for Node.js CLI applications on limited input devices (i.e. IoT).",
   "main": "FirebaseDeviceFlow.js",
   "scripts": {
@@ -25,17 +25,13 @@
   },
   "homepage": "https://github.com/OpenFormTech/FirebaseDeviceFlow#readme",
   "dependencies": {
-    "axios": "^0.21.0",
-    "firebase": "^8.0.0",
+    "axios": "^0.21.1",
+    "chalk": "^4.1.0",
+    "firebase": "^8.2.1",
     "inquirer": "^7.3.3",
-    "n": "^6.7.0",
-    "ora": "^5.1.0"
+    "ora": "^5.2.0"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.12.3",
-    "@babel/preset-env": "^7.12.1"
   }
 }
