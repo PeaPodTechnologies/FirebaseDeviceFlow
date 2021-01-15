@@ -303,7 +303,7 @@ class DeviceFlowUI {
     }
     /**
      * Signs the user in to your app.
-     * @returns {Promise<firebase.default.auth.UserCredential>} The user.
+     * @returns {Promise<firebase.default.User>} The user.
      **/
     async signIn() {
         while (this.app.auth().currentUser === null) {
@@ -322,7 +322,7 @@ class DeviceFlowUI {
     /**
      * Signs the user in to your app using the given provider.
      * @param {DeviceFlowManager} provider - The provider to use.
-     * @returns {Promise<firebase.default.auth.UserCredential>} The user.
+     * @returns {Promise<firebase.default.User>} The user.
      */
     async signInViaProvider(provider) {
         var loading;
@@ -408,7 +408,7 @@ class DeviceFlowUI {
      * Links a new credential to an existing account.
      * @param {String} email The account's email, by which the default existing method is fetched.
      * @param {firebase.default.auth.AuthCredential} newCred The new credential.
-     * @return {Promise<firebase.default.auth.UserCredential>} The user, now associated with both credentials.
+     * @return {Promise<firebase.default.User>} The user, now associated with both credentials.
      */
     async linkCredToExisting(email, newCred) {
         const providerIDToName = {

@@ -28,7 +28,8 @@ const ui = new fdf.DeviceFlowUI(app, {
  */
 
 ui.signIn().then(user=>{
-    //Do what you want!
+    console.log("Welcome, "+user.displayName+"!");
+    // Do what you want here!
 }, err=>{
     console.log(err);
 });
