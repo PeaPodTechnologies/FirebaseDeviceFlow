@@ -14,9 +14,9 @@ Firebase authentication via [OAuth2 'Device Flow'](https://www.oauth.com/oauth2-
 See [test.js](./test.js).
 
 1. Import `FirebaseDeviceFlow`.
-2. Initialize Firebase app.
-3. Pass app reference and OAuth config to `DeviceFlowUI` constructor.
-4. `DeviceFlowUI.signIn()`
+2. Initialize your Firebase app.
+3. Pass app reference and OAuth config object to `DeviceFlowUI` constructor.
+4. Execute `DeviceFlowUI.signIn()`. This will return a **Promise\<UserCredential\>**.
 
 ## How It Works
 
@@ -33,5 +33,5 @@ Google has a great resource on ["OAuth 2.0 for TV and Limited-Input Device Appli
 
 ## Todo
 
-- [ ] 'Slow down' error code handling
+- [ ] 'Slow down' error code handling?
 - [ ] Add more providers?
