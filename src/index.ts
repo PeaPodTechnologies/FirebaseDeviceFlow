@@ -15,11 +15,11 @@ const sleep = (millis : number) => {
  * @param {AxiosResponse} response Axios response object.
  * @returns {Boolean} Does the repsonse meet certain conditions?
  */
-interface ResponseConditions {
+type ResponseConditions = {
     (response: AxiosResponse): boolean;
 }
 
-interface AuthenticationResponse {
+type AuthenticationResponse = {
     url: string,
     code: string,
     device_code: string,
@@ -28,7 +28,7 @@ interface AuthenticationResponse {
     [index: string]: any
 }
 
-interface TokenResponse {
+type TokenResponse = {
     access_token: string,
     id_token?: string,
     [index: string]: any
@@ -44,7 +44,7 @@ interface TokenResponse {
  * @param {number} timeout - The maximum time in seconds to spend trying to fetch. Defaults to 10 seconds.
  * @param {AxiosRequestConfig} options - Options for the Axios POST handler. Defaults to requesting JSON and disable status code validation.
  * @returns {Promise<AxiosResponse>} The response.
- */
+*/
 function repeatedPOST(url : string, body : Object, successConditions : ResponseConditions, failureConditions : ResponseConditions, interval : number = 1, timeout : number = 10, options : AxiosRequestConfig = {
     headers: {
         'Accept': 'application/json'
