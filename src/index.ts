@@ -247,7 +247,7 @@ const ProviderURLMap : TProviderURLMap = {
 // Build a "Name" : "Name" object, because fuck you that's why. Enums suck asshole, so I made a self-indexed string enum.
 type TProviderIDMap = {
     [key in TProviderID]: key
-} 
+}
 function buildProviderIDMap(names : typeof ProviderNames) : TProviderIDMap {
     let o : {
         [key : string] : string

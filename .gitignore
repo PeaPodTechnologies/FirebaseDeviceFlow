@@ -117,4 +117,5 @@ dist
 
 # Typescript package
 dist/
-mytest.ts
+dist/mytest.*
+src/mytest.*
