@@ -11,7 +11,7 @@ Firebase authentication via [OAuth2 'Device Flow'](https://www.oauth.com/oauth2-
 
 ## Example Usage
 
-See [test.js](./test.js).
+See [test.ts](./test.ts).
 
 1. Import `FirebaseDeviceFlow`.
 2. Initialize your Firebase app.

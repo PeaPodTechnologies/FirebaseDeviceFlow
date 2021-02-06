@@ -1,6 +1,6 @@
 //SAMPLE TEST CODE
 import firebase from "firebase/app";
-import { DeviceFlowUI } from "./index";
+import { DeviceFlowUI } from "./src/FirebaseDeviceFlow";
 
 const app = firebase.initializeApp({
     // Firebase App Config Object

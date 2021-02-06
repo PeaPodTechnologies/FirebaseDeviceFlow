@@ -1,6 +1,11 @@
+node_modules/
 tsconfig.json
-src/
-dist/mytest.d.ts
-dist/mytest.js
-dist/test.ts
-dist/test.d.ts
+
+# src/*
+test.ts
+
+.git/
+.gitignore
+.gitattributes
+.npmignore
+package-lock.json
