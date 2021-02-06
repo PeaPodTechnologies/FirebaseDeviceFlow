@@ -225,9 +225,26 @@ function stringTuple<T extends [string] | string[]>(...data: T): T {
     return data;
 }
 
+// To add a new provider: add printed name to the `stringTuple` args, device flow object to `TProviderMap` union and `ProviderMap` const, url entry to ProviderURLMap
+
 const ProviderNames = stringTuple('Google', 'GitHub');
 type TProviderID = typeof ProviderNames[number];
+type TProviderMap = {
+    [key in TProviderID]: typeof GoogleDeviceFlow | typeof GitHubDeviceFlow
+}
+type TProviderURLMap = {
+    [key in TProviderID]: string
+}
+const ProviderMap : TProviderMap = {
+    Google: GoogleDeviceFlow,
+    GitHub: GitHubDeviceFlow
+}
+const ProviderURLMap : TProviderURLMap = {
+    Google: "google.com",
+    GitHub: "github.com"
+}
 
+// Build a "Name" : "Name" object, because fuck you that's why. Enums suck asshole, so I made a self-indexed string enum.
 type TProviderIDMap = {
     [key in TProviderID]: key
 } 
@@ -242,14 +259,6 @@ function buildProviderIDMap(names : typeof ProviderNames) : TProviderIDMap {
 }
 const ProviderIDMap : TProviderIDMap = buildProviderIDMap(ProviderNames);
 
-type TProviderMap = {
-    [key in TProviderID]: typeof GoogleDeviceFlow | typeof GitHubDeviceFlow
-}
-
-type TProviderURLMap = {
-    [key in TProviderID]: string
-}
-
 // The DeviceFlowUI options object, indexed by that enum of strings
 export type DeviceFlowUIOptions = {
     [key in TProviderID]?: {
@@ -257,16 +266,6 @@ export type DeviceFlowUIOptions = {
         clientsecret?: string,
         scopes: string[]
     }
-}
-
-const ProviderMap : TProviderMap = {
-    Google: GoogleDeviceFlow,
-    GitHub: GitHubDeviceFlow
-}
-
-const ProviderURLMap : TProviderURLMap = {
-    Google: "google.com",
-    GitHub: "github.com"
 }
 
 //UI
