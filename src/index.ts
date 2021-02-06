@@ -1,15 +1,10 @@
-//Firebase Dependencies
-const firebase = require("firebase/app");
-require('firebase/auth');
-
-//HTTP
-const axios = require("axios").default;
-
-//UI
-const ora = require('ora');
-const chalk = require('chalk');
-const inquirer = require('inquirer');
-const sleep = millis => {
+import firebase from "firebase";
+import auth from "firebase/auth"
+import axios, {AxiosResponse, AxiosRequestConfig} from 'axios';
+import ora from 'ora';
+import chalk from 'chalk';
+import inquirer from 'inquirer';
+const sleep = (millis : number) => {
     return new Promise(resolve => {
         setTimeout(resolve, millis);
     });
@@ -17,29 +12,46 @@ const sleep = millis => {
 
 /**
  * Failure, success, etc. conditions for an Axios responses.
- * @callback ResponseConditions
  * @param {AxiosResponse} response Axios response object.
  * @returns {Boolean} Does the repsonse meet certain conditions?
  */
+type ResponseConditions = {
+    (response: AxiosResponse): boolean;
+}
+
+type AuthenticationResponse = {
+    url: string,
+    code: string,
+    device_code: string,
+    interval: number,
+    expires_in: number,
+    [index: string]: any
+}
+
+type TokenResponse = {
+    access_token: string,
+    id_token?: string,
+    [index: string]: any
+}
 
 /**
  * POSTs an endpoint repeatedly until either success or failure conditions are met.
- * @param {String} url - The URL of the endpoint to POST.
+ * @param {string} url - The URL of the endpoint to POST.
  * @param {Object} body - The body of the POST request.
  * @param {ResponseConditions} successConditions Success conditions. True if successful response, then this will return `response.data`.
  * @param {ResponseConditions} failureConditions Failure conditions. True if failed response, then this will throw `response`.
- * @param {Number} interval - The delay in seconds between attempts. Defaults to 1 second.
- * @param {Number} timeout - The maximum time in seconds to spend trying to fetch. Defaults to 10 seconds.
- * @param {Object} options - Options for the Axios POST handler. Defaults to requesting JSON and disable status code validation.
- * @returns {Promise<AxiosResponse | Error>} The response.
- */
-function repeatedPOST(url, body, successConditions, failureConditions, interval = 1, timeout = 10, options = {
+ * @param {number} interval - The delay in seconds between attempts. Defaults to 1 second.
+ * @param {number} timeout - The maximum time in seconds to spend trying to fetch. Defaults to 10 seconds.
+ * @param {AxiosRequestConfig} options - Options for the Axios POST handler. Defaults to requesting JSON and disable status code validation.
+ * @returns {Promise<AxiosResponse>} The response.
+*/
+function repeatedPOST(url : string, body : Object, successConditions : ResponseConditions, failureConditions : ResponseConditions, interval : number = 1, timeout : number = 10, options : AxiosRequestConfig = {
     headers: {
         'Accept': 'application/json'
     },
     validateStatus: undefined
-}) {
-    return new Promise((resolve, reject) => {
+}) : Promise<AxiosResponse> {
+    return new Promise<AxiosResponse>((resolve, reject) => {
         const _interval = setInterval(async () => {
             try {
                 let response = await axios.post(url, body, options);
@@ -67,60 +79,28 @@ function repeatedPOST(url, body, successConditions, failureConditions, interval 
 }
 
 /**
- * Abstract base class for all per-provider device flow managers.
+ * Abstract base interface for all per-provider device flow managers.
  */
-class DeviceFlowManager {
-    //The name of the provider.
-    name;
-    //The Firebase provider object for this provider.
-    firebaseProvider;
-    /**
-     * Constructs an instance of the DeviceFlowManager interface.
-     * @param {String} name - The human-readable name of the provider (i.e. "Google")
-     * @param {firebase.default.auth.OAuthProvider} firebaseProvider - The Firebase provider object.
-     */
-    constructor(name, firebaseProvider) {
-        if (this.constructor == DeviceFlowManager) {
-            throw new Error("Abstract classes can't be instantiated.");
-        }
-        this.name = name;
-        this.firebaseProvider = firebaseProvider;
-    }
-
-    /**
-     * Polls the provider's OAuth token endpoint for the access token until the user completes the authorization step.
-     * @param {Object} authorizationResponse The response data from the authorization step.
-     * @param {String} clientid The OAuth Client ID for your app.
-     * @param {undefined} clientsecret The OAuth Client Secret for your app.
-     * @returns {Promise<Object>} The response data.
-     */
-    tokenRequest(authorizationResponse, clientid, clientsecret = undefined) {
-        throw new Error("Not implemented.");
-    }
-
-    /**
-     * Polls the provider's OAuth Device Flow authorization endpoint for the device code, URL, etc.
-     * @param {String} clientid The OAuth Client ID for your app.
-     * @param {String[]} scopes The scopes this token requires (provider-specific).
-     * @returns {Promise<Object>} The response data.
-     */
-    authorizationRequest(clientid, scopes) {
-        throw new Error("Not implemented.");
-    }
+interface DeviceFlowManager {
+    name : string,
+    firebaseProvider : any,
+    authorizationRequest(clientid : string, scopes : string[]) : Promise<AuthenticationResponse>,
+    tokenRequest(authorizationResponse : AuthenticationResponse, clientid : string, clientsecret : string) : Promise<TokenResponse>,
+    firebaseCredential(tokenResponse : TokenResponse) : firebase.auth.OAuthCredential
 }
 
-class GoogleDeviceFlow extends DeviceFlowManager {
-    openid;
-    constructor() {
-        super('Google', firebase.auth.GoogleAuthProvider);
-    }
+class GoogleDeviceFlow implements DeviceFlowManager {
+    private openid : any;
+    readonly name : string = "Google";
+    readonly firebaseProvider = firebase.auth.GoogleAuthProvider;
+    constructor() {}
     /**
      * Polls the Google OAuth Device Flow authorization endpoint for the device code, URL, etc.
-     * @param {String} clientid The "TVs and Limited Input devices" OAuth 2.0 Client ID generated via the [GCP Console](https://console.developers.google.com/apis/credentials).
-     * @param {String[]} scopes The scopes this token requires, from (this list)[https://developers.google.com/identity/protocols/oauth2/limited-input-device#allowedscopes].
-     * @returns {Promise<Object>} The response data.
+     * @param {string} clientid The "TVs and Limited Input devices" OAuth 2.0 Client ID generated via the [GCP Console](https://console.developers.google.com/apis/credentials).
+     * @param {string[]} scopes The scopes this token requires, from (this list)[https://developers.google.com/identity/protocols/oauth2/limited-input-device#allowedscopes].
+     * @returns {Promise<AuthenticationResponse>} The response data.
      */
-    authorizationRequest(clientid, scopes) {
+    authorizationRequest(clientid : string, scopes : string[]) : Promise<AuthenticationResponse> {
         return axios.get("https://accounts.google.com/.well-known/openid-configuration", {
             headers: {
                 'Accept': 'application/json'
@@ -141,57 +121,59 @@ class GoogleDeviceFlow extends DeviceFlowManager {
             }, response => {
                 return [403].includes(response.status)
             }).then(auth => {
-                auth.data.url = auth.data.verification_url;
-                auth.data.code = auth.data.user_code;
-                return auth.data;
+                let result : AuthenticationResponse = auth.data;
+                result.url = auth.data.verification_url;
+                result.code = auth.data.user_code;
+                return result;
             });
         });
     }
     /**
      * Polls the Google OAuth token endpoint for the access token until the user completes the authorization step.
-     * @param {Object} authorizationResponse The response data from the authorization step.
+     * @param {AuthenticationResponse} authorizationResponse The response data from the authorization step.
      * @param {String} clientid The "TVs and Limited Input devices" OAuth 2.0 Client ID generated via the [GCP Console](https://console.developers.google.com/apis/credentials). 
      * @param {String} clientsecret The "TVs and Limited Input devices" OAuth 2.0 Client Secret generated via the [GCP Console](https://console.developers.google.com/apis/credentials).
-     * @returns {Promise<Object>} The response data.
+     * @returns {Promise<TokenResponse>} The response data.
      */
-    tokenRequest(authorizationResponse, clientid, clientsecret) {
+    tokenRequest(authorizationResponse : AuthenticationResponse, clientid : string, clientsecret : string) : Promise<TokenResponse>{
         return repeatedPOST(this.openid.token_endpoint, {
             'client_id': clientid,
             'client_secret': clientsecret,
             'device_code': authorizationResponse.device_code,
-            'grant_type': this.openid.grant_types_supported.filter(grant_type => {
+            'grant_type': (this.openid.grant_types_supported as Array<string>).filter(grant_type => {
                 return grant_type.includes("device_code");
             })[0]
         }, response => {
             return [200].includes(response.status) && response.data.error == undefined;
         }, response => {
             return [400, 401, 403].includes(response.status) && ['invalid_client', 'access_denied', 'slow_down', 'invalid_grant', 'unsupported_grant_type'].includes(response.data.error);
-        }, authorizationResponse.interval + 1, authorizationResponse.expires_in).then(token => {
-            return token.data;
+        }, authorizationResponse.interval + 1, authorizationResponse.expires_in).then(token=>{
+            return (token.data as TokenResponse);
         });
     }
 
     /**
      * Builds and returns a Google-provider Firebase credential out of the token step's response.
-     * @param {Object} tokenResponse - The response from the token step.
+     * @param {TokenResponse} tokenResponse - The response from the token step.
      * @returns {firebase.auth.OAuthCredential} The Firebase credential.
      */
-    firebaseCredential(tokenResponse) {
+    firebaseCredential(tokenResponse : TokenResponse) : firebase.auth.OAuthCredential{
         return this.firebaseProvider.credential(tokenResponse.id_token, tokenResponse.access_token);
     }
 }
 
-class GitHubDeviceFlow extends DeviceFlowManager {
-    constructor() {
-        super('GitHub', firebase.auth.GithubAuthProvider);
-    }
+class GitHubDeviceFlow implements DeviceFlowManager {
+    private openid : any;
+    readonly name : string = "GitHub";
+    readonly firebaseProvider = firebase.auth.GithubAuthProvider;
+    constructor() {}
     /**
      * Polls the Github OAuth Device Flow authorization endpoint for the device code, URL, etc.
-     * @param {String} clientid The OAuth App Client ID generated via the [GitHub Developer settings panel](https://github.com/settings/developers).
-     * @param {String[]} scopes The scopes this token requires, from (this list)[https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps].
-     * @returns {Promise<Object | Error>} The response data.
+     * @param {string} clientid The OAuth App Client ID generated via the [GitHub Developer settings panel](https://github.com/settings/developers).
+     * @param {string[]} scopes The scopes this token requires, from (this list)[https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps].
+     * @returns {Promise<AuthenticationResponse>} The response data.
      */
-    authorizationRequest(clientid, scopes) {
+    authorizationRequest(clientid : string, scopes : string[]) : Promise<AuthenticationResponse> {
         return repeatedPOST('https://github.com/login/device/code', {
             'client_id': clientid,
             'scope': scopes.join(" ").toLowerCase()
@@ -201,19 +183,20 @@ class GitHubDeviceFlow extends DeviceFlowManager {
             console.log(response.data)
             return [403].includes(response.status)
         }).then(auth => {
-            auth.data.url = auth.data.verification_uri;
-            auth.data.code = auth.data.user_code;
-            return auth.data;
+            let response : AuthenticationResponse = auth.data;
+            response.url = auth.data.verification_uri;
+            response.code = auth.data.user_code;
+            return response;
         });
     }
     /**
      * Polls the Github OAuth token endpoint for the access token until the user completes the authorization step.
-     * @param {Object} authorizationResponse The response data from the authorization step.
-     * @param {String} clientid The OAuth App Client ID generated via the [GitHub Developer settings panel](https://github.com/settings/developers).
-     * @param {undefined} clientsecret Unused.
-     * @returns {Promise<Object>} The response data.
+     * @param {AuthenticationResponse} authorizationResponse The response data from the authorization step.
+     * @param {string} clientid The OAuth App Client ID generated via the [GitHub Developer settings panel](https://github.com/settings/developers).
+     * @param {string} clientsecret Unused.
+     * @returns {Promise<TokenResponse>} The response data.
      */
-    tokenRequest(authorizationResponse, clientid, clientsecret = undefined) {
+    tokenRequest(authorizationResponse : AuthenticationResponse, clientid : string, clientsecret : string) : Promise<TokenResponse>{
         return repeatedPOST('https://github.com/login/oauth/access_token', {
             'client_id': clientid,
             'device_code': authorizationResponse.device_code,
@@ -223,28 +206,70 @@ class GitHubDeviceFlow extends DeviceFlowManager {
         }, response => {
             // console.log(response)
             return ['expired_token', 'unsupported_grant_type', 'incorrect_client_credentials', 'incorrect_device_code', 'access_denied'].includes(response.data.error);
-        }, authorizationResponse.interval + 1, authorizationResponse.expires_in).then(token => {
-            return token.data;
+        }, authorizationResponse.interval + 1, authorizationResponse.expires_in).then(token=>{
+            let result : TokenResponse = token.data;
+            return result;
         });
     }
     /**
      * Builds and returns a GitHub-provider Firebase credential out of the token step's response.
-     * @param {Object} tokenResponse - The response from the token step.
+     * @param {TokenResponse} tokenResponse - The response from the token step.
      * @returns {firebase.auth.OAuthCredential} The Firebase credential.
      */
-    firebaseCredential(tokenResponse) {
+    firebaseCredential(tokenResponse : TokenResponse) {
         return this.firebaseProvider.credential(tokenResponse.access_token);
     }
 }
 
-//Namespace Fields and Functions
-const Providers = {
-    'Google': GoogleDeviceFlow,
-    'GitHub': GitHubDeviceFlow
+function stringTuple<T extends [string] | string[]>(...data: T): T {
+    return data;
+}
+
+// To add a new provider: add printed name to the `stringTuple` args, device flow object to `TProviderMap` union and `ProviderMap` const, url entry to ProviderURLMap
+
+const ProviderNames = stringTuple('Google', 'GitHub');
+type TProviderID = typeof ProviderNames[number];
+type TProviderMap = {
+    [key in TProviderID]: typeof GoogleDeviceFlow | typeof GitHubDeviceFlow
+}
+type TProviderURLMap = {
+    [key in TProviderID]: string
+}
+const ProviderMap : TProviderMap = {
+    Google: GoogleDeviceFlow,
+    GitHub: GitHubDeviceFlow
+}
+const ProviderURLMap : TProviderURLMap = {
+    Google: "google.com",
+    GitHub: "github.com"
+}
+
+// Build a "Name" : "Name" object, because fuck you that's why. Enums suck asshole, so I made a self-indexed string enum.
+type TProviderIDMap = {
+    [key in TProviderID]: key
+}
+function buildProviderIDMap(names : typeof ProviderNames) : TProviderIDMap {
+    let o : {
+        [key : string] : string
+    } = {}; 
+    for(const i of ProviderNames){
+        o[i] = i;
+    }
+    return o as TProviderIDMap;
+}
+const ProviderIDMap : TProviderIDMap = buildProviderIDMap(ProviderNames);
+
+// The DeviceFlowUI options object, indexed by that enum of strings
+export type DeviceFlowUIOptions = {
+    [key in TProviderID]?: {
+        clientid: string,
+        clientsecret?: string,
+        scopes: string[]
+    }
 }
 
 //UI
-const defaultSpinner = {
+const defaultSpinner : ora.Spinner = {
     interval: 50,
     frames: [
         "▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁",
@@ -273,68 +298,55 @@ const defaultSpinner = {
 /**
  * Prebuilt turn-key Firebase Device Flow UI.
  */
-class DeviceFlowUI {
-    loadingSpinner;
-    config;
-    app;
+export class DeviceFlowUI {
+    app : firebase.app.App;
+    options : DeviceFlowUIOptions;
+    loadingSpinner : ora.Spinner;
     /**
-     * Constructs a Firebase Device Flow UI instance with OAuth settings. See `Providers` for the individual provider requirements.
+     * Constructs a Firebase Device Flow UI instance with your app's OAuth settings.
      * @param {firebase.default.app.App} app The initialized Firebase app.
-     * @param {Object} config The set of config objects for each provider.
-     * @param {Object} config.Google The Google config object. Leave `undefined` to disable this provider.
-     * @param {String} config.Google.clientid The "TVs and Limited Input devices" OAuth 2.0 Client ID generated via the [GCP Console](https://console.developers.google.com/apis/credentials).
-     * @param {String} config.Google.clientsecret The "TVs and Limited Input devices" OAuth 2.0 Client Secret generated via the [GCP Console](https://console.developers.google.com/apis/credentials).
-     * @param {String[]} config.Google.scopes The scopes this token requires, from (this list)[https://developers.google.com/identity/protocols/oauth2/limited-input-device#allowedscopes].
-     * @param {Object} config.GitHub The GitHub config object. Leave `undefined` to disable this provider.
-     * @param {String} config.GitHub.clientid The OAuth App Client ID generated via the [GitHub Developer settings panel](https://github.com/settings/developers).
-     * @param {String} config.GitHub.clientsecret Unused.
-     * @param {String[]} config.GitHub.scopes The scopes this token requires, from (this list)[https://docs.github.com/en/free-pro-team/developers/apps/scopes-for-oauth-apps].
+     * @param {DeviceFlowUIOptions} options Your app's OAuth settings.
      * @param {ora.Spinner} loadingSpinner The `ora` spinner object (see the [`ora` spinner documentation](https://www.npmjs.com/package/ora#spinner) for details).
      */
-    constructor(app, config, loadingSpinner = defaultSpinner) {
+    constructor(app : firebase.app.App, options : DeviceFlowUIOptions, loadingSpinner : ora.Spinner = defaultSpinner) {
         this.app = app;
+        this.options = options;
         this.loadingSpinner = loadingSpinner;
-        this.config = Object.fromEntries(Object.entries(config).filter(provider => {
-            return Object.keys(Providers).includes(provider[0]);
-        }));
-        if (Object.keys(this.config).length < 1) {
-            throw new Error("Invalid config - no providers recognized! Names are case sensitive.");
-        }
     }
     /**
      * Signs the user in to your app.
-     * @returns {Promise<firebase.default.User>} The user.
+     * @returns {Promise<firebase.User>} The user.
      **/
-    async signIn() {
+    public signIn = async () : Promise<firebase.User> => {
         while (this.app.auth().currentUser === null) {
             //Select provider
-            const provider = (await inquirer.prompt([{
+            const provider : TProviderID = (await inquirer.prompt([{
                 type: 'list',
                 name: 'provider',
                 message: 'Sign in via:',
-                choices: Object.keys(this.config),
+                choices: Object.values(ProviderIDMap).filter(provider => {return this.options[provider] != undefined}),
             }])).provider;
-            await this.signInViaProvider(new Providers[provider]());
+            await this.signInViaProvider(provider);
         }
-        return this.app.auth().currentUser;
+        return (this.app.auth().currentUser as firebase.User);
     }
 
     /**
      * Signs the user in to your app using the given provider.
-     * @param {DeviceFlowManager} provider - The provider to use.
-     * @returns {Promise<firebase.default.User>} The user.
+     * @param {TProviderID} providerid - The ID of the provider to use.
+     * @returns {Promise<firebase.auth.UserCredential>} The user.
      */
-    async signInViaProvider(provider) {
-        var loading;
+    private signInViaProvider = async (providerid : TProviderID) : Promise<firebase.auth.UserCredential | undefined> => {
+        var provider = new ProviderMap[providerid]();
+        var loading : ora.Ora;
+        loading = ora({
+            text: 'Fetching ' + chalk.bold(provider.name) + ' Device Code & URL...',
+            spinner: this.loadingSpinner,
+        }).start();
         //Authenticate with Firebase
         try {
             //Get login code
-            loading = ora({
-                text: 'Fetching ' + chalk.bold(provider.name) + ' Device Code & URL...',
-                spinner: this.loadingSpinner,
-            }).start();
-
-            var authResponse = await provider.authorizationRequest(this.config[provider.name].clientid, this.config[provider.name].scopes);
+            var authResponse = await provider.authorizationRequest(this.options[providerid]?.clientid as string, this.options[providerid]?.scopes as string[]);
         } catch (err) {
             if (err.data.error) {
                 loading.fail('Fetching ' + chalk.bold(provider.name) + ' Device Code & URL Failed! (Code ' + err.status + '-' + err.data.error + ')');
@@ -359,7 +371,7 @@ class DeviceFlowUI {
                 spinner: this.loadingSpinner,
             }).start();
 
-            var tokenResponse = await provider.tokenRequest(authResponse, this.config[provider.name].clientid, this.config[provider.name].clientsecret);
+            var tokenResponse = await provider.tokenRequest(authResponse, this.options[providerid]?.clientid as string, this.options[providerid]?.clientsecret as string);
 
             loading.succeed(chalk.bold(provider.name) + ' Access Token Recieved!')
             // console.log(tokenResponse);
@@ -383,12 +395,7 @@ class DeviceFlowUI {
             }).start();
 
             const user = await this.app.auth().signInWithCredential(provider.firebaseCredential(tokenResponse));
-
-            if (user.additionalUserInfo.profile.name == undefined) {
-                loading.succeed('Authenticated Successfully!');
-            } else {
-                loading.succeed('Authenticated ' + chalk.bold(user.additionalUserInfo.profile.name) + ' Successfully!');
-            }
+            loading.succeed('Authenticated Successfully!');
             await sleep(2000);
             return user;
         } catch (err) {
@@ -408,18 +415,23 @@ class DeviceFlowUI {
      * Links a new credential to an existing account.
      * @param {String} email The account's email, by which the default existing method is fetched.
      * @param {firebase.default.auth.AuthCredential} newCred The new credential.
-     * @return {Promise<firebase.default.User>} The user, now associated with both credentials.
+     * @return {Promise<firebase.default.User | undefined>} The user, now associated with both credentials.
      */
-    async linkCredToExisting(email, newCred) {
-        const providerIDToName = {
-            'google.com': "Google",
-            'github.com': "GitHub"
-        };
-
+    private linkCredToExisting = async (email : string, newCred : firebase.auth.AuthCredential) : Promise<firebase.auth.UserCredential | undefined> => {
         var loading;
 
         //It's implied this works
-        var defaultMethod = providerIDToName[(await this.app.auth().fetchSignInMethodsForEmail(email))[0]];
+        const defaultURL = (await this.app.auth().fetchSignInMethodsForEmail(email))[0];
+        let defaultMethod : TProviderID | undefined;
+        for(const entry of Object.entries(ProviderURLMap)){
+            if(entry[1] == defaultURL){
+                defaultMethod = ProviderIDMap[entry[0] as TProviderID];
+            }
+        }
+        if(!defaultMethod){
+            throw new Error("Hmmmmm");
+        }
+
         var link = (await inquirer.prompt([{
             type: 'list',
             name: 'link',
@@ -437,10 +449,15 @@ class DeviceFlowUI {
 
         //Link em?
         if (link == 'Link') {
-            console.log("Sign in to " + chalkPresets.cloudponics + " via " + chalk.bold(defaultMethod) + ':');
-            await sleep(2000);
-            const user = await this.signInViaProvider(new Providers[defaultMethod]());
-
+            let user : firebase.auth.UserCredential | undefined;
+            while(!user){
+                console.log("Sign in via " + chalk.bold(defaultMethod) + ':');
+                await sleep(2000);
+                user = await this.signInViaProvider(defaultMethod);
+            }
+            if(user.user === null){
+                throw new Error("Hmmmmmmm");
+            }
             //Link success, return user
             loading = ora({
                 text: 'Linking...',
@@ -457,6 +474,3 @@ class DeviceFlowUI {
         }
     }
 }
-
-module.exports.DeviceFlowUI = DeviceFlowUI;
-module.exports.Providers = Providers;

@@ -1,12 +1,12 @@
 //SAMPLE TEST CODE
-const firebase = require('firebase/app');
-const fdf = require('./FirebaseDeviceFlow');
+import firebase from "firebase/app";
+import { DeviceFlowUI } from "./index";
 
 const app = firebase.initializeApp({
     // Firebase App Config Object
 });
 
-const ui = new fdf.DeviceFlowUI(app, {
+const ui = new DeviceFlowUI(app, {
     //FDF Config Object
 });
 
@@ -28,7 +28,11 @@ const ui = new fdf.DeviceFlowUI(app, {
  */
 
 ui.signIn().then(user=>{
-    console.log("Welcome, "+user.displayName+"!");
+    if(user.displayName){
+        console.log("Welcome, "+user.displayName+"!");
+    } else {
+        console.log("Welcome!");
+    }
     // Do what you want here!
 }, err=>{
     console.log(err);

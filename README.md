@@ -30,8 +30,12 @@ Google has a great resource on ["OAuth 2.0 for TV and Limited-Input Device Appli
 
 - Node.js and `npm`
 - Install JS dependencies with `npm i`
+- Compile with `tsc --build`
 
 ## Todo
 
+- [X] Convert to Typescript
 - [ ] 'Slow down' error code handling?
 - [ ] Add more providers?
+
+[![firebase](https://firebase.google.com/downloads/brand-guidelines/SVG/logo-built_white.svg)](https://firebase.google.com/)
