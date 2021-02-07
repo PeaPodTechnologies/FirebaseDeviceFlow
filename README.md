@@ -35,7 +35,7 @@ Google has a great resource on ["OAuth 2.0 for TV and Limited-Input Device Appli
 ## Todo
 
 - [X] Convert to Typescript
-- [ ] Change package structure for easier import (currently `import { DeviceFlowUI } from 'FirebaseDeviceFlow/dist/FirebaseDeviceFlow';`)
+- [X] Change package structure for easier import (currently `import { DeviceFlowUI } from 'FirebaseDeviceFlow/dist/FirebaseDeviceFlow';`)
 - [ ] 'Slow down' error code handling?
 - [ ] Add more providers?
 
