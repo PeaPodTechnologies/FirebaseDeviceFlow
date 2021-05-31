@@ -1,14 +1,14 @@
 {
-  "name": "@openformtech/firebasedeviceflow",
-  "version": "0.1.3",
-  "description": "Firebase authentication via OAuth2 'Device Flow' for Node.js CLI applications on limited input devices (i.e. IoT).",
+  "name": "@utagritech/firebasedeviceflow",
+  "version": "0.1.0",
+  "description": "Firebase authentication for Node.js CLI applications on limited input devices via OAuth2 'Device Flow'.",
   "main": "dist/FirebaseDeviceFlow.js",
   "types": "dist/FirebaseDeviceFlow.d.ts",
   "scripts": {
     "test": "node ./dist/index.js",
     "build": "tsc --build"
   },
-  "repository": "git://github.com/openformtech/firebasedeviceflow.git",
+  "repository": "git://github.com/utagritech/firebasedeviceflow.git",
   "keywords": [
     "oauth2",
     "auth",
@@ -18,13 +18,13 @@
     "iot"
   ],
   "author": {
-    "name": "OpenFormTech"
+    "name": "UTAgritech"
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/OpenFormTech/FirebaseDeviceFlow/issues"
+    "url": "https://github.com/UTAgritech/FirebaseDeviceFlow/issues"
   },
-  "homepage": "https://github.com/OpenFormTech/FirebaseDeviceFlow#readme",
+  "homepage": "https://github.com/UTAgritech/FirebaseDeviceFlow#readme",
   "dependencies": {
     "@types/inquirer": "^7.3.1",
     "axios": "^0.21.1",
