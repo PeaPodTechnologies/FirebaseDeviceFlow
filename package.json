@@ -5,7 +5,7 @@
   "main": "dist/FirebaseDeviceFlow.js",
   "types": "dist/FirebaseDeviceFlow.d.ts",
   "scripts": {
-    "test": "node test.js",
+    "test": "npm run build; node test.js",
     "build": "tsc --build"
   },
   "repository": "git://github.com/utagritech/firebasedeviceflow.git",
