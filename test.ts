@@ -1,6 +1,7 @@
 //SAMPLE TEST CODE
 import firebase from "firebase/app";
 import { DeviceFlowUI } from "./dist/FirebaseDeviceFlow";
+import * as fs from 'fs';
 
 // OPTION 1: Create config objects directly
 
@@ -30,9 +31,15 @@ import { DeviceFlowUI } from "./dist/FirebaseDeviceFlow";
 
 // OPTION 2: Set up your app to use a .env file for the two configuration objects.
 
-const config = require('dotenv').config();
-if (config.error) {
-    throw config.error
+if(fs.existsSync('.env')){
+    const config = require('dotenv').config();
+    if (config.error) {
+        throw config.error
+    } else {
+        console.log('Environment variable file found!')
+    }
+} else {
+    console.log('Environment variable file not found. Assuming variables set.')
 }
 
 const app = firebase.initializeApp({
