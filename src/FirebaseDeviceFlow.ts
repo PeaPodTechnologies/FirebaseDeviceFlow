@@ -473,4 +473,23 @@ export class DeviceFlowUI {
             return;
         }
     }
+
+    public authTests = async () : Promise<void> => {
+        for(const providerid of Object.values(ProviderIDMap)){
+            console.log("Testing "+providerid+":");
+            var provider = new ProviderMap[providerid]();
+            try {
+                //Get login code
+                var authResponse = await provider.authorizationRequest(this.options[providerid]?.clientid as string, this.options[providerid]?.scopes as string[]);
+            } catch (err) {
+                if (err.data.error) {
+                    throw new Error('Fetching ' + chalk.bold(provider.name) + ' Device Code & URL Failed! (Code ' + err.status + '-' + err.data.error + ')');
+                } else {
+                    throw new Error('Fetching ' + chalk.bold(provider.name) + ' Device Code & URL Failed! (Code ' + err.status + ')');
+                }
+            }
+            console.log(`Device Code Fetched! ${authResponse.code} @ ${authResponse.url}`);
+        }
+        console.log('All tests passed.')
+    }
 }

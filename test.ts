@@ -3,7 +3,7 @@ import firebase from "firebase/app";
 import { DeviceFlowUI } from "./dist/FirebaseDeviceFlow";
 import * as fs from 'fs';
 
-// OPTION 1: Create config objects directly
+// ------ OPTION 1: Create config objects directly ------
 
 // const app = firebase.initializeApp({
 //     // Firebase App Config Object
@@ -29,7 +29,7 @@ import * as fs from 'fs';
 //      */
 // });
 
-// OPTION 2: Set up your app to use a .env file for the two configuration objects.
+// ------ OPTION 2: Set up your app to use a .env file for the two configuration objects ------
 
 if(fs.existsSync('.env')){
     const config = require('dotenv').config();
@@ -39,7 +39,7 @@ if(fs.existsSync('.env')){
         console.log('Environment variable file found!')
     }
 } else {
-    console.log('Environment variable file not found. Assuming variables set.')
+    console.log('Environment variable file not found. Assuming variables are set.')
 }
 
 const app = firebase.initializeApp({
@@ -66,13 +66,18 @@ const ui = new DeviceFlowUI(app, {
     }
 });
 
-ui.signIn().then(user=>{
-    if(user.displayName){
-        console.log("Welcome, "+user.displayName+"!");
-    } else {
-        console.log("Welcome!");
-    }
-    // Do what you want here!
-}, err=>{
-    console.log(err);
-});
+// FOR PRODUCTION: Sign in functionality
+
+// ui.signIn().then(user=>{
+//     if(user.displayName){
+//         console.log("Welcome, "+user.displayName+"!");
+//     } else {
+//         console.log("Welcome!");
+//     }
+//     // Do what you want here!
+// }, err=>{
+//     console.log(err);
+// });
+
+// FOR EVALUATION: Unit tests
+ui.authTests();
