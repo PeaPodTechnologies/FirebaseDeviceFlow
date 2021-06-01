@@ -1,0 +1,14 @@
+language: node_js
+node_js:
+  - node
+
+deploy:
+  provider: npm
+  email: jayden.lefebvre55@gmail.com
+  api_key:
+    secure: pHtvstslPjrHlb5AyxNBX1xMx6/fzWKp59eSJrvADvPddJJdsypxBno1AtDNArlDlPc57bQoMDqguzRC6J7tedqW4mXAAOf0MCUJq5RgE4McvBTuBjK6t8YBUziO5eTGBgc84rhKs40XwF3gjYDqWeeGx0cFzb0PfnD7MnpQhXBVprU9KDjt3AYT5Li5A0EX5HmrSLJN/WdUwy/6G3IKifTIPgu0I6e7vC8M+/Dd41ZDPspYe+FWpLncZuH92RAmAN0pO+HSJ+v5K5MJQnh0UQ0uU/43d8xho7x9EWmApgUvBg307h75o12G2BQtN0oJUJApeC1AhuHfvhNcmfbL66SrVJQPfHYBb98rpCagnHjFEBYuDPodv45vLSjiCaUbpQiWQ0KM3OUXSXxyomDFbTvkebnhErVXbHNrvMuBzw9TxxDpU7kYfDS8PZUjtgia2g99EFwl/xvmxsuYM8e6flfNY6Ta7sEUJSt6RLrJeIRvU1z359k6jXhKMTRt2lbiqIJxwueflrVrH5mO0xMpdgAu5KCVNq2qCmJq4OlTR+u90hDrm6ehRX88S2+Ku1SjuRzQdTpNeqMEXiqOQEm/m+2rFsC9qAfFAUQ20niZKZq+gqkfgyb0iBbDV1ASohSWBMYpYnkBuHksdndeoxNqVA41pBFeiKU0Lw3YU9V/52c=
+  on:
+    tags: true
+    repo: UTAgritech/FirebaseDeviceFlow
+    branch: master
+  skip_cleanup: false

@@ -3,6 +3,8 @@ tsconfig.json
 
 # src/*
 test.ts
+test.d.ts
+test.js
 
 .git/
 .gitignore

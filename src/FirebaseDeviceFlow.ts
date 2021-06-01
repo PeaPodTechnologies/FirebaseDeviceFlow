@@ -262,9 +262,9 @@ const ProviderIDMap : TProviderIDMap = buildProviderIDMap(ProviderNames);
 // The DeviceFlowUI options object, indexed by that enum of strings
 export type DeviceFlowUIOptions = {
     [key in TProviderID]?: {
-        clientid: string,
+        clientid?: string,
         clientsecret?: string,
-        scopes: string[]
+        scopes?: string[]
     }
 }
 
@@ -324,7 +324,7 @@ export class DeviceFlowUI {
                 type: 'list',
                 name: 'provider',
                 message: 'Sign in via:',
-                choices: Object.values(ProviderIDMap).filter(provider => {return this.options[provider] != undefined}),
+                choices: Object.values(ProviderIDMap).filter(provider => {return this.options[provider] != undefined && this.options[provider]?.clientid != undefined && this.options[provider]?.scopes != undefined}),
             }])).provider;
             await this.signInViaProvider(provider);
         }

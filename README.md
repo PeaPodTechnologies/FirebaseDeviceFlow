@@ -15,7 +15,7 @@ See [test.ts](./test.ts).
 
 1. Import `FirebaseDeviceFlow`.
 2. Initialize your Firebase app.
-3. Pass app reference and OAuth config object to `DeviceFlowUI` constructor.
+3. Pass Firebase app reference and OAuth config object to `DeviceFlowUI` constructor. If any parameters are absent from the OAuth config object, the relevant auth provider will be excluded from the UI.
 4. Execute `DeviceFlowUI.signIn()`. This will return a **Promise\<UserCredential\>**.
 
 ## How It Works
@@ -26,16 +26,18 @@ Google has a great resource on ["OAuth 2.0 for TV and Limited-Input Device Appli
 
 # Development
 
+Build and test with the usual `npm run build`, `npm run test`. For testing, you will have to initialize your own Firebase app and provider support.
+
 ## Requirements
 
 - Node.js and `npm`
-- Install JS dependencies with `npm i`
-- Compile with `tsc --build`
+- Dependencies (install with `npm install`)
 
 ## Todo
 
 - [X] Convert to Typescript
 - [X] Change package structure for easier import (currently `import { DeviceFlowUI } from 'FirebaseDeviceFlow/dist/FirebaseDeviceFlow';`)
+- [X] Fix testing
 - [ ] 'Slow down' error code handling?
 - [ ] Add more providers?
 
