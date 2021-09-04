@@ -59,11 +59,11 @@ const ui = new DeviceFlowUI(app, {
         clientid : process.env.GOOGLE_CLIENTID,
         clientsecret : process.env.GOOGLE_CLIENTSECRET
     },
-    GitHub : {
-        scopes : process.env.GITHUB_SCOPES?.split(' '),
-        clientid : process.env.GITHUB_CLIENTID,
-        clientsecret : process.env.GITHUB_CLIENTSECRET
-    }
+    // GitHub : {
+    //     scopes : process.env.GITHUB_SCOPES?.split(' '),
+    //     clientid : process.env.GITHUB_CLIENTID,
+    //     clientsecret : process.env.GITHUB_CLIENTSECRET
+    // }
 });
 
 // FOR PRODUCTION: Sign in functionality

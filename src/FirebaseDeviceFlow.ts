@@ -62,7 +62,7 @@ function repeatedPOST(url : string, body : Object, successConditions : ResponseC
                     end();
                     reject(response);
                 }
-            } catch (err) {
+            } catch (err: any) {
                 end();
                 reject(err);
             }
@@ -347,7 +347,7 @@ export class DeviceFlowUI {
         try {
             //Get login code
             var authResponse = await provider.authorizationRequest(this.options[providerid]?.clientid as string, this.options[providerid]?.scopes as string[]);
-        } catch (err) {
+        } catch (err: any) {
             if (err.data.error) {
                 loading.fail('Fetching ' + chalk.bold(provider.name) + ' Device Code & URL Failed! (Code ' + err.status + '-' + err.data.error + ')');
             } else {
@@ -376,7 +376,7 @@ export class DeviceFlowUI {
             loading.succeed(chalk.bold(provider.name) + ' Access Token Recieved!')
             // console.log(tokenResponse);
             await sleep(1000);
-        } catch (err) {
+        } catch (err: any) {
             //General errors
             if (err.data.error) {
                 loading.fail(chalk.bold(provider.name) + ' Authorization & Token Fetch Failed! (Code ' + err.status + '-' + err.data.error + ')');
@@ -398,7 +398,7 @@ export class DeviceFlowUI {
             loading.succeed('Authenticated Successfully!');
             await sleep(2000);
             return user;
-        } catch (err) {
+        } catch (err: any) {
             //Different credentials, same email?
             if (err.code == 'auth/account-exists-with-different-credential') {
                 loading.stop();
@@ -481,7 +481,7 @@ export class DeviceFlowUI {
             try {
                 //Get login code
                 var authResponse = await provider.authorizationRequest(this.options[providerid]?.clientid as string, this.options[providerid]?.scopes as string[]);
-            } catch (err) {
+            } catch (err: any) {
                 if (err.data.error) {
                     throw new Error('Fetching ' + chalk.bold(provider.name) + ' Device Code & URL Failed! (Code ' + err.status + '-' + err.data.error + ')');
                 } else {
