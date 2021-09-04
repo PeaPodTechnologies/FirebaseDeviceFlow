@@ -80,4 +80,6 @@ const ui = new DeviceFlowUI(app, {
 // });
 
 // FOR EVALUATION: Unit tests
-ui.authTests();
+ui.authTests().catch(reason=>{
+    console.log(reason)
+});

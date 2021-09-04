@@ -60,7 +60,7 @@ function repeatedPOST(url : string, body : Object, successConditions : ResponseC
                     resolve(response);
                 } else if (failureConditions(response)) {
                     end();
-                    reject(response);
+                    reject(new Error(String(response)));
                 }
             } catch (err: any) {
                 end();
@@ -117,7 +117,7 @@ class GoogleDeviceFlow implements DeviceFlowManager {
                 'client_id': clientid,
                 'scope': scopes.join(" ").toLowerCase()
             }, response => {
-                return [200].includes(response.status) && response.data.error == undefined;
+                return [200].includes(response.status) && response.data.error === undefined;
             }, response => {
                 return [403].includes(response.status)
             }).then(auth => {
@@ -180,7 +180,6 @@ class GitHubDeviceFlow implements DeviceFlowManager {
         }, response => {
             return [200].includes(response.status) && response.data.error == undefined;
         }, response => {
-            console.log(response.data)
             return [403].includes(response.status)
         }).then(auth => {
             let response : AuthenticationResponse = auth.data;
@@ -348,7 +347,7 @@ export class DeviceFlowUI {
             //Get login code
             var authResponse = await provider.authorizationRequest(this.options[providerid]?.clientid as string, this.options[providerid]?.scopes as string[]);
         } catch (err: any) {
-            if (err.data.error) {
+            if (err.data && err.data.error) {
                 loading.fail('Fetching ' + chalk.bold(provider.name) + ' Device Code & URL Failed! (Code ' + err.status + '-' + err.data.error + ')');
             } else {
                 loading.fail('Fetching ' + chalk.bold(provider.name) + ' Device Code & URL Failed! (Code ' + err.status + ')');
@@ -378,7 +377,7 @@ export class DeviceFlowUI {
             await sleep(1000);
         } catch (err: any) {
             //General errors
-            if (err.data.error) {
+            if (err.data && err.data.error) {
                 loading.fail(chalk.bold(provider.name) + ' Authorization & Token Fetch Failed! (Code ' + err.status + '-' + err.data.error + ')');
             } else {
                 loading.fail(chalk.bold(provider.name) + ' Authorization & Token Fetch Failed! (Code ' + err.status + ')');
@@ -476,17 +475,16 @@ export class DeviceFlowUI {
 
     public authTests = async () : Promise<void> => {
         for(const providerid of Object.values(ProviderIDMap)){
+            if(!Object.keys(this.options).includes(providerid)){
+                continue
+            }
             console.log("Testing "+providerid+":");
             var provider = new ProviderMap[providerid]();
             try {
                 //Get login code
                 var authResponse = await provider.authorizationRequest(this.options[providerid]?.clientid as string, this.options[providerid]?.scopes as string[]);
             } catch (err: any) {
-                if (err.data.error) {
-                    throw new Error('Fetching ' + chalk.bold(provider.name) + ' Device Code & URL Failed! (Code ' + err.status + '-' + err.data.error + ')');
-                } else {
-                    throw new Error('Fetching ' + chalk.bold(provider.name) + ' Device Code & URL Failed! (Code ' + err.status + ')');
-                }
+                throw new Error('Fetching ' + chalk.bold(provider.name) + ' Device Code & URL Failed!');
             }
             console.log(`Device Code Fetched! ${authResponse.code} @ ${authResponse.url}`);
         }

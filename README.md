@@ -6,19 +6,27 @@ Firebase authentication via [OAuth2 'Device Flow'](https://www.oauth.com/oauth2-
 
 [![Build Status](https://travis-ci.com/UTAgritech/FirebaseDeviceFlow.svg?branch=master)](https://travis-ci.com/UTAgritech/FirebaseDeviceFlow)
 
-## Providers Currently Implemented
+## Provider Setup
 
-- GitHub [(Docs)](https://docs.github.com/en/free-pro-team@latest/developers/apps/authorizing-oauth-apps#device-flow)
-- Google [(Docs)](https://developers.google.com/identity/protocols/oauth2/limited-input-device)
+### Google
+
+[Docs](https://developers.google.com/identity/protocols/oauth2/limited-input-device)
+
+1. Create new **OAuth client ID** credentials in the [GCP Credentials page](https://console.cloud.google.com/apis/credentials). For the Application Type, select "TVs and Limited Input devices".
+2. Copy the Client ID and Client Secret values into either an .env file, or input directly into the config object (seen `test.ts`).
+
+### GitHub
+
+[Docs](https://docs.github.com/en/free-pro-team@latest/developers/apps/authorizing-oauth-apps#device-flow)
 
 ## Example Usage
 
 See [test.ts](./test.ts).
 
-1. Import `FirebaseDeviceFlow`.
-2. Initialize your Firebase app.
-3. Pass Firebase app reference and OAuth config object to `DeviceFlowUI` constructor. If any parameters are absent from the OAuth config object, the relevant auth provider will be excluded from the UI.
-4. Execute `DeviceFlowUI.signIn()`. This will return a **Promise\<UserCredential\>**.
+3. Import `FirebaseDeviceFlow`.
+4. Initialize your Firebase app.
+5. Pass Firebase app reference and OAuth config object to `DeviceFlowUI` constructor. If any parameters are absent from the OAuth config object, the relevant auth provider will be excluded from the UI.
+6. Execute `DeviceFlowUI.signIn()`. This will return a **Promise\<UserCredential\>**.
 
 ## How It Works
 

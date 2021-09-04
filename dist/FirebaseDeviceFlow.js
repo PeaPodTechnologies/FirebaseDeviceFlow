@@ -76,7 +76,7 @@ function repeatedPOST(url, body, successConditions, failureConditions, interval,
                         }
                         else if (failureConditions(response)) {
                             end();
-                            reject(response);
+                            reject(new Error(String(response)));
                         }
                         return [3, 3];
                     case 2:
@@ -121,7 +121,7 @@ var GoogleDeviceFlow = (function () {
                 'client_id': clientid,
                 'scope': scopes.join(" ").toLowerCase()
             }, function (response) {
-                return [200].includes(response.status) && response.data.error == undefined;
+                return [200].includes(response.status) && response.data.error === undefined;
             }, function (response) {
                 return [403].includes(response.status);
             }).then(function (auth) {
@@ -165,7 +165,6 @@ var GitHubDeviceFlow = (function () {
         }, function (response) {
             return [200].includes(response.status) && response.data.error == undefined;
         }, function (response) {
-            console.log(response.data);
             return [403].includes(response.status);
         }).then(function (auth) {
             var response = auth.data;
@@ -290,7 +289,7 @@ var DeviceFlowUI = (function () {
                         return [3, 5];
                     case 3:
                         err_2 = _e.sent();
-                        if (err_2.data.error) {
+                        if (err_2.data && err_2.data.error) {
                             loading.fail('Fetching ' + chalk_1.default.bold(provider.name) + ' Device Code & URL Failed! (Code ' + err_2.status + '-' + err_2.data.error + ')');
                         }
                         else {
@@ -325,7 +324,7 @@ var DeviceFlowUI = (function () {
                         return [3, 12];
                     case 10:
                         err_3 = _e.sent();
-                        if (err_3.data.error) {
+                        if (err_3.data && err_3.data.error) {
                             loading.fail(chalk_1.default.bold(provider.name) + ' Authorization & Token Fetch Failed! (Code ' + err_3.status + '-' + err_3.data.error + ')');
                         }
                         else {
@@ -437,7 +436,7 @@ var DeviceFlowUI = (function () {
             });
         }); };
         this.authTests = function () { return __awaiter(_this, void 0, void 0, function () {
-            var _i, _a, providerid, provider, authResponse, err_5;
+            var _i, _a, providerid, provider, authResponse, error_1, err;
             var _b, _c;
             return __generator(this, function (_d) {
                 switch (_d.label) {
@@ -447,6 +446,9 @@ var DeviceFlowUI = (function () {
                     case 1:
                         if (!(_i < _a.length)) return [3, 7];
                         providerid = _a[_i];
+                        if (!Object.keys(this.options).includes(providerid)) {
+                            return [3, 6];
+                        }
                         console.log("Testing " + providerid + ":");
                         provider = new ProviderMap[providerid]();
                         _d.label = 2;
@@ -457,14 +459,9 @@ var DeviceFlowUI = (function () {
                         authResponse = _d.sent();
                         return [3, 5];
                     case 4:
-                        err_5 = _d.sent();
-                        if (err_5.data.error) {
-                            throw new Error('Fetching ' + chalk_1.default.bold(provider.name) + ' Device Code & URL Failed! (Code ' + err_5.status + '-' + err_5.data.error + ')');
-                        }
-                        else {
-                            throw new Error('Fetching ' + chalk_1.default.bold(provider.name) + ' Device Code & URL Failed! (Code ' + err_5.status + ')');
-                        }
-                        return [3, 5];
+                        error_1 = _d.sent();
+                        err = error_1;
+                        throw new Error('Fetching ' + chalk_1.default.bold(provider.name) + ' Device Code & URL Failed! Message: ' + err.message);
                     case 5:
                         console.log("Device Code Fetched! " + authResponse.code + " @ " + authResponse.url);
                         _d.label = 6;

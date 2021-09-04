@@ -1,34 +1,31 @@
 "use strict";
-var _a, _b;
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+var _a;
 exports.__esModule = true;
-//SAMPLE TEST CODE
-var app_1 = require("firebase/app");
+var app_1 = __importDefault(require("firebase/app"));
 var FirebaseDeviceFlow_1 = require("./dist/FirebaseDeviceFlow");
-var fs = require("fs");
-// ------ OPTION 1: Create config objects directly ------
-// const app = firebase.initializeApp({
-//     // Firebase App Config Object
-// });
-// const ui = new DeviceFlowUI(app, {
-//     //FDF Config Object
-//     /**
-//      * Example FDF Config Object:
-//      * 
-//      * - Provider is a key, one of Google, GitHub, etc.
-//      * - Scopes are a list of scope strings (defined by the provider's API)
-//      * - Client ID and client secret are provided by the providers
-//      * 
-//      * {
-//      *   Provider1 : {
-//      *     scopes : ['scope'],
-//      *     clientid : 'clientid',
-//      *     clientsecret : 'clientsecret'
-//      *   },
-//      *   Provider2 : ...
-//      * }
-//      */
-// });
-// ------ OPTION 2: Set up your app to use a .env file for the two configuration objects ------
+var fs = __importStar(require("fs"));
 if (fs.existsSync('.env')) {
     var config = require('dotenv').config();
     if (config.error) {
@@ -56,23 +53,8 @@ var ui = new FirebaseDeviceFlow_1.DeviceFlowUI(app, {
         scopes: (_a = process.env.GOOGLE_SCOPES) === null || _a === void 0 ? void 0 : _a.split(' '),
         clientid: process.env.GOOGLE_CLIENTID,
         clientsecret: process.env.GOOGLE_CLIENTSECRET
-    },
-    GitHub: {
-        scopes: (_b = process.env.GITHUB_SCOPES) === null || _b === void 0 ? void 0 : _b.split(' '),
-        clientid: process.env.GITHUB_CLIENTID,
-        clientsecret: process.env.GITHUB_CLIENTSECRET
     }
 });
-// FOR PRODUCTION: Sign in functionality
-// ui.signIn().then(user=>{
-//     if(user.displayName){
-//         console.log("Welcome, "+user.displayName+"!");
-//     } else {
-//         console.log("Welcome!");
-//     }
-//     // Do what you want here!
-// }, err=>{
-//     console.log(err);
-// });
-// FOR EVALUATION: Unit tests
-ui.authTests();
+ui.authTests()["catch"](function (reason) {
+    console.log(reason);
+});
