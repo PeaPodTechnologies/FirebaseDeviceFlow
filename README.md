@@ -13,11 +13,16 @@ Firebase authentication via [OAuth2 'Device Flow'](https://www.oauth.com/oauth2-
 [Docs](https://developers.google.com/identity/protocols/oauth2/limited-input-device)
 
 1. Create new **OAuth client ID** credentials in the [GCP Credentials page](https://console.cloud.google.com/apis/credentials). For the Application Type, select "TVs and Limited Input devices".
-2. Copy the Client ID and Client Secret values into either an .env file, or input directly into the config object (seen `test.ts`).
+2. Copy the Client ID and Client Secret values into either an `.env` file, or input directly into the config object (see `test.ts`).
 
 ### GitHub
 
 [Docs](https://docs.github.com/en/free-pro-team@latest/developers/apps/authorizing-oauth-apps#device-flow)
+
+1. Create a new GitHub OAuth app [(guide)](https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app).
+2. Copy the Client ID and Client Secret values into either an `.env` file, or input directly into the config object (see `test.ts`).
+3. Set the Client ID and Client Secret fields in the Firebase Console under *Authentication* > *Sign-in method* > *Sign-in providers* > *GitHub*
+4. Finally, copy the *Authorization callback URL* from the Firebase Console to your GitHub OAuth app's settings.
 
 ## Example Usage
 
@@ -52,3 +57,11 @@ Build and test with the usual `npm run build`, `npm run test`. For testing, you 
 - [ ] Add more providers?
 
 [![firebase](https://firebase.google.com/downloads/brand-guidelines/SVG/logo-built_white.svg)](https://firebase.google.com/)
+
+# FAQ
+
+## I'm getting X error, wtf is going on?
+
+Make sure you've done the following:
+
+1. **All** per-provider setup (outlined above)

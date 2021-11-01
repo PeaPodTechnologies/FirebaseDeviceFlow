@@ -40,7 +40,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DeviceFlowUI = void 0;
-var firebase_1 = __importDefault(require("firebase"));
+var app_1 = __importDefault(require("firebase/app"));
+require("firebase/auth");
 var axios_1 = __importDefault(require("axios"));
 var ora_1 = __importDefault(require("ora"));
 var chalk_1 = __importDefault(require("chalk"));
@@ -101,7 +102,7 @@ function repeatedPOST(url, body, successConditions, failureConditions, interval,
 var GoogleDeviceFlow = (function () {
     function GoogleDeviceFlow() {
         this.name = "Google";
-        this.firebaseProvider = firebase_1.default.auth.GoogleAuthProvider;
+        this.firebaseProvider = app_1.default.auth.GoogleAuthProvider;
     }
     GoogleDeviceFlow.prototype.authorizationRequest = function (clientid, scopes) {
         var _this = this;
@@ -156,7 +157,7 @@ var GoogleDeviceFlow = (function () {
 var GitHubDeviceFlow = (function () {
     function GitHubDeviceFlow() {
         this.name = "GitHub";
-        this.firebaseProvider = firebase_1.default.auth.GithubAuthProvider;
+        this.firebaseProvider = app_1.default.auth.GithubAuthProvider;
     }
     GitHubDeviceFlow.prototype.authorizationRequest = function (clientid, scopes) {
         return repeatedPOST('https://github.com/login/device/code', {
@@ -173,7 +174,7 @@ var GitHubDeviceFlow = (function () {
             return response;
         });
     };
-    GitHubDeviceFlow.prototype.tokenRequest = function (authorizationResponse, clientid, clientsecret) {
+    GitHubDeviceFlow.prototype.tokenRequest = function (authorizationResponse, clientid) {
         return repeatedPOST('https://github.com/login/oauth/access_token', {
             'client_id': clientid,
             'device_code': authorizationResponse.device_code,
@@ -318,6 +319,7 @@ var DeviceFlowUI = (function () {
                     case 8:
                         tokenResponse = _e.sent();
                         loading.succeed(chalk_1.default.bold(provider.name) + ' Access Token Recieved!');
+                        console.log(tokenResponse);
                         return [4, sleep(1000)];
                     case 9:
                         _e.sent();
@@ -436,7 +438,7 @@ var DeviceFlowUI = (function () {
             });
         }); };
         this.authTests = function () { return __awaiter(_this, void 0, void 0, function () {
-            var _i, _a, providerid, provider, authResponse, error_1, err;
+            var _i, _a, providerid, provider, authResponse, err_5;
             var _b, _c;
             return __generator(this, function (_d) {
                 switch (_d.label) {
@@ -459,9 +461,14 @@ var DeviceFlowUI = (function () {
                         authResponse = _d.sent();
                         return [3, 5];
                     case 4:
-                        error_1 = _d.sent();
-                        err = error_1;
-                        throw new Error('Fetching ' + chalk_1.default.bold(provider.name) + ' Device Code & URL Failed! Message: ' + err.message);
+                        err_5 = _d.sent();
+                        if (err_5) {
+                            throw new Error('Fetching ' + chalk_1.default.bold(provider.name) + ' Device Code & URL Failed: ' + err_5);
+                        }
+                        else {
+                            throw new Error('Fetching ' + chalk_1.default.bold(provider.name) + ' Device Code & URL Failed!');
+                        }
+                        return [3, 5];
                     case 5:
                         console.log("Device Code Fetched! " + authResponse.code + " @ " + authResponse.url);
                         _d.label = 6;

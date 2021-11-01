@@ -1,5 +1,5 @@
 //SAMPLE TEST CODE
-import firebase from "firebase/app";
+import firebase from 'firebase/app';
 import { DeviceFlowUI } from "./dist/FirebaseDeviceFlow";
 import * as fs from 'fs';
 
@@ -59,27 +59,27 @@ const ui = new DeviceFlowUI(app, {
         clientid : process.env.GOOGLE_CLIENTID,
         clientsecret : process.env.GOOGLE_CLIENTSECRET
     },
-    // GitHub : {
-    //     scopes : process.env.GITHUB_SCOPES?.split(' '),
-    //     clientid : process.env.GITHUB_CLIENTID,
-    //     clientsecret : process.env.GITHUB_CLIENTSECRET
-    // }
+    GitHub : {
+        scopes : process.env.GITHUB_SCOPES?.split(' '),
+        clientid : process.env.GITHUB_CLIENTID,
+        clientsecret : process.env.GITHUB_CLIENTSECRET
+    }
 });
-
-// FOR PRODUCTION: Sign in functionality
-
-// ui.signIn().then(user=>{
-//     if(user.displayName){
-//         console.log("Welcome, "+user.displayName+"!");
-//     } else {
-//         console.log("Welcome!");
-//     }
-//     // Do what you want here!
-// }, err=>{
-//     console.log(err);
-// });
 
 // FOR EVALUATION: Unit tests
-ui.authTests().catch(reason=>{
+ui.authTests().then(()=>{
+    // FOR PRODUCTION: Sign in functionality
+    ui.signIn().then(user=>{
+        if(user.displayName){
+            console.log("Welcome, "+user.displayName+"!");
+        } else {
+            console.log("Welcome!");
+        }
+        // Do what you want here!
+    }, err=>{
+        console.log(err);
+    });
+}).catch(reason=>{
     console.log(reason)
 });
+

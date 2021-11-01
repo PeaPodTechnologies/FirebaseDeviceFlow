@@ -21,7 +21,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var _a;
+var _a, _b;
 exports.__esModule = true;
 var app_1 = __importDefault(require("firebase/app"));
 var FirebaseDeviceFlow_1 = require("./dist/FirebaseDeviceFlow");
@@ -53,8 +53,24 @@ var ui = new FirebaseDeviceFlow_1.DeviceFlowUI(app, {
         scopes: (_a = process.env.GOOGLE_SCOPES) === null || _a === void 0 ? void 0 : _a.split(' '),
         clientid: process.env.GOOGLE_CLIENTID,
         clientsecret: process.env.GOOGLE_CLIENTSECRET
+    },
+    GitHub: {
+        scopes: (_b = process.env.GITHUB_SCOPES) === null || _b === void 0 ? void 0 : _b.split(' '),
+        clientid: process.env.GITHUB_CLIENTID,
+        clientsecret: process.env.GITHUB_CLIENTSECRET
     }
 });
-ui.authTests()["catch"](function (reason) {
+ui.authTests().then(function () {
+    ui.signIn().then(function (user) {
+        if (user.displayName) {
+            console.log("Welcome, " + user.displayName + "!");
+        }
+        else {
+            console.log("Welcome!");
+        }
+    }, function (err) {
+        console.log(err);
+    });
+})["catch"](function (reason) {
     console.log(reason);
 });

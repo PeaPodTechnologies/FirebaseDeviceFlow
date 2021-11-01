@@ -1,4 +1,5 @@
-import firebase from "firebase";
+import firebase from "firebase/app";
+import "firebase/auth";
 import ora from 'ora';
 declare const ProviderNames: ["Google", "GitHub"];
 declare type TProviderID = typeof ProviderNames[number];

@@ -1,5 +1,5 @@
-import firebase from "firebase";
-import auth from "firebase/auth"
+import firebase from "firebase/app";
+import "firebase/auth";
 import axios, {AxiosResponse, AxiosRequestConfig} from 'axios';
 import ora from 'ora';
 import chalk from 'chalk';
@@ -195,7 +195,7 @@ class GitHubDeviceFlow implements DeviceFlowManager {
      * @param {string} clientsecret Unused.
      * @returns {Promise<TokenResponse>} The response data.
      */
-    tokenRequest(authorizationResponse : AuthenticationResponse, clientid : string, clientsecret : string) : Promise<TokenResponse>{
+    tokenRequest(authorizationResponse : AuthenticationResponse, clientid : string) : Promise<TokenResponse>{
         return repeatedPOST('https://github.com/login/oauth/access_token', {
             'client_id': clientid,
             'device_code': authorizationResponse.device_code,
@@ -373,7 +373,7 @@ export class DeviceFlowUI {
             var tokenResponse = await provider.tokenRequest(authResponse, this.options[providerid]?.clientid as string, this.options[providerid]?.clientsecret as string);
 
             loading.succeed(chalk.bold(provider.name) + ' Access Token Recieved!')
-            // console.log(tokenResponse);
+            console.log(tokenResponse);
             await sleep(1000);
         } catch (err: any) {
             //General errors
@@ -484,7 +484,11 @@ export class DeviceFlowUI {
                 //Get login code
                 var authResponse = await provider.authorizationRequest(this.options[providerid]?.clientid as string, this.options[providerid]?.scopes as string[]);
             } catch (err: any) {
-                throw new Error('Fetching ' + chalk.bold(provider.name) + ' Device Code & URL Failed!');
+                if(err) {
+                    throw new Error('Fetching ' + chalk.bold(provider.name) + ' Device Code & URL Failed: '+err);
+                } else {
+                    throw new Error('Fetching ' + chalk.bold(provider.name) + ' Device Code & URL Failed!');
+                }
             }
             console.log(`Device Code Fetched! ${authResponse.code} @ ${authResponse.url}`);
         }
