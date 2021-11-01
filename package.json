@@ -6,7 +6,7 @@
   "types": "dist/FirebaseDeviceFlow.d.ts",
   "scripts": {
     "test": "npm run build && tsc test.ts --esModuleInterop --removeComments --strict && node test.js",
-    "build": "tsc --build"
+    "build": "npm i && tsc --build"
   },
   "repository": "git://github.com/PeaPodTechnologies/firebasedeviceflow.git",
   "keywords": [
