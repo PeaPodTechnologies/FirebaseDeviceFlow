@@ -1,6 +1,6 @@
-import firebase from "firebase/app";
-import "firebase/auth";
-import ora from 'ora';
+import { FirebaseApp } from "firebase/app";
+import { User } from "firebase/auth";
+import { Spinner } from 'ora';
 declare const ProviderNames: ["Google", "GitHub"];
 declare type TProviderID = typeof ProviderNames[number];
 export declare type DeviceFlowUIOptions = {
@@ -11,11 +11,11 @@ export declare type DeviceFlowUIOptions = {
     };
 };
 export declare class DeviceFlowUI {
-    app: firebase.app.App;
+    app: FirebaseApp;
     options: DeviceFlowUIOptions;
-    loadingSpinner: ora.Spinner;
-    constructor(app: firebase.app.App, options: DeviceFlowUIOptions, loadingSpinner?: ora.Spinner);
-    signIn: () => Promise<firebase.User>;
+    loadingSpinner: Spinner;
+    constructor(app: FirebaseApp, options: DeviceFlowUIOptions, loadingSpinner?: Spinner);
+    signIn: () => Promise<User>;
     private signInViaProvider;
     private linkCredToExisting;
     authTests: () => Promise<void>;

@@ -40,8 +40,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DeviceFlowUI = void 0;
-var app_1 = __importDefault(require("firebase/app"));
-require("firebase/auth");
+var auth_1 = require("firebase/auth");
 var axios_1 = __importDefault(require("axios"));
 var ora_1 = __importDefault(require("ora"));
 var chalk_1 = __importDefault(require("chalk"));
@@ -102,7 +101,7 @@ function repeatedPOST(url, body, successConditions, failureConditions, interval,
 var GoogleDeviceFlow = (function () {
     function GoogleDeviceFlow() {
         this.name = "Google";
-        this.firebaseProvider = app_1.default.auth.GoogleAuthProvider;
+        this.firebaseProvider = auth_1.GoogleAuthProvider;
     }
     GoogleDeviceFlow.prototype.authorizationRequest = function (clientid, scopes) {
         var _this = this;
@@ -157,7 +156,7 @@ var GoogleDeviceFlow = (function () {
 var GitHubDeviceFlow = (function () {
     function GitHubDeviceFlow() {
         this.name = "GitHub";
-        this.firebaseProvider = app_1.default.auth.GithubAuthProvider;
+        this.firebaseProvider = auth_1.GithubAuthProvider;
     }
     GitHubDeviceFlow.prototype.authorizationRequest = function (clientid, scopes) {
         return repeatedPOST('https://github.com/login/device/code', {
@@ -247,13 +246,16 @@ var DeviceFlowUI = (function () {
     function DeviceFlowUI(app, options, loadingSpinner) {
         var _this = this;
         if (loadingSpinner === void 0) { loadingSpinner = defaultSpinner; }
+        this.app = app;
+        this.options = options;
+        this.loadingSpinner = loadingSpinner;
         this.signIn = function () { return __awaiter(_this, void 0, void 0, function () {
             var provider;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!(this.app.auth().currentUser === null)) return [3, 3];
+                        if (!(auth_1.getAuth(this.app).currentUser === null)) return [3, 3];
                         return [4, inquirer_1.default.prompt([{
                                     type: 'list',
                                     name: 'provider',
@@ -266,7 +268,7 @@ var DeviceFlowUI = (function () {
                     case 2:
                         _a.sent();
                         return [3, 0];
-                    case 3: return [2, this.app.auth().currentUser];
+                    case 3: return [2, auth_1.getAuth(this.app).currentUser];
                 }
             });
         }); };
@@ -293,8 +295,11 @@ var DeviceFlowUI = (function () {
                         if (err_2.data && err_2.data.error) {
                             loading.fail('Fetching ' + chalk_1.default.bold(provider.name) + ' Device Code & URL Failed! (Code ' + err_2.status + '-' + err_2.data.error + ')');
                         }
-                        else {
+                        else if (err_2.status) {
                             loading.fail('Fetching ' + chalk_1.default.bold(provider.name) + ' Device Code & URL Failed! (Code ' + err_2.status + ')');
+                        }
+                        else {
+                            loading.fail('Fetching ' + chalk_1.default.bold(provider.name) + ' Device Code & URL Failed!');
                         }
                         return [4, sleep(2000)];
                     case 4:
@@ -319,7 +324,6 @@ var DeviceFlowUI = (function () {
                     case 8:
                         tokenResponse = _e.sent();
                         loading.succeed(chalk_1.default.bold(provider.name) + ' Access Token Recieved!');
-                        console.log(tokenResponse);
                         return [4, sleep(1000)];
                     case 9:
                         _e.sent();
@@ -329,8 +333,11 @@ var DeviceFlowUI = (function () {
                         if (err_3.data && err_3.data.error) {
                             loading.fail(chalk_1.default.bold(provider.name) + ' Authorization & Token Fetch Failed! (Code ' + err_3.status + '-' + err_3.data.error + ')');
                         }
-                        else {
+                        else if (err_3.status) {
                             loading.fail(chalk_1.default.bold(provider.name) + ' Authorization & Token Fetch Failed! (Code ' + err_3.status + ')');
+                        }
+                        else {
+                            loading.fail(chalk_1.default.bold(provider.name) + ' Authorization & Token Fetch Failed!');
                         }
                         return [4, sleep(2000)];
                     case 11:
@@ -342,7 +349,7 @@ var DeviceFlowUI = (function () {
                             text: 'Authenticating...',
                             spinner: this.loadingSpinner,
                         }).start();
-                        return [4, this.app.auth().signInWithCredential(provider.firebaseCredential(tokenResponse))];
+                        return [4, auth_1.signInWithCredential(auth_1.getAuth(this.app), provider.firebaseCredential(tokenResponse))];
                     case 13:
                         user = _e.sent();
                         loading.succeed('Authenticated Successfully!');
@@ -354,7 +361,7 @@ var DeviceFlowUI = (function () {
                         err_4 = _e.sent();
                         if (!(err_4.code == 'auth/account-exists-with-different-credential')) return [3, 17];
                         loading.stop();
-                        return [4, this.linkCredToExisting(err_4.email, provider.firebaseCredential(tokenResponse))];
+                        return [4, this.linkCredToExisting(err_4.customData.email, provider.firebaseCredential(tokenResponse))];
                     case 16: return [2, _e.sent()];
                     case 17:
                         loading.fail(err_4.message);
@@ -371,7 +378,7 @@ var DeviceFlowUI = (function () {
             var loading, defaultURL, defaultMethod, _i, _a, entry, link, user;
             return __generator(this, function (_b) {
                 switch (_b.label) {
-                    case 0: return [4, this.app.auth().fetchSignInMethodsForEmail(email)];
+                    case 0: return [4, auth_1.fetchSignInMethodsForEmail(auth_1.getAuth(this.app), email)];
                     case 1:
                         defaultURL = (_b.sent())[0];
                         for (_i = 0, _a = Object.entries(ProviderURLMap); _i < _a.length; _i++) {
@@ -420,7 +427,7 @@ var DeviceFlowUI = (function () {
                             text: 'Linking...',
                             spinner: this.loadingSpinner,
                         }).start();
-                        return [4, user.user.linkWithCredential(newCred)];
+                        return [4, auth_1.linkWithCredential(user.user, newCred)];
                     case 7:
                         _b.sent();
                         loading.succeed("Linked " + chalk_1.default.bold(defaultMethod) + " Credential to Account!");
@@ -481,9 +488,6 @@ var DeviceFlowUI = (function () {
                 }
             });
         }); };
-        this.app = app;
-        this.options = options;
-        this.loadingSpinner = loadingSpinner;
     }
     return DeviceFlowUI;
 }());

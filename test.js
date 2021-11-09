@@ -18,12 +18,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 var _a, _b;
 exports.__esModule = true;
-var app_1 = __importDefault(require("firebase/app"));
+var app_1 = require("firebase/app");
 var FirebaseDeviceFlow_1 = require("./dist/FirebaseDeviceFlow");
 var fs = __importStar(require("fs"));
 if (fs.existsSync('.env')) {
@@ -38,7 +35,7 @@ if (fs.existsSync('.env')) {
 else {
     console.log('Environment variable file not found. Assuming variables are set.');
 }
-var app = app_1["default"].initializeApp({
+var app = app_1.initializeApp({
     apiKey: process.env.FIREBASE_APIKEY,
     authDomain: process.env.FIREBASE_AUTHDOMAIN,
     databaseURL: process.env.FIREBASE_DATABASEURL,

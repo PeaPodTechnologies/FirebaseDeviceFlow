@@ -1,6 +1,6 @@
 {
   "name": "@peapodtech/firebasedeviceflow",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Firebase authentication for Node.js CLI applications on limited input devices via OAuth2 'Device Flow'.",
   "main": "dist/FirebaseDeviceFlow.js",
   "types": "dist/FirebaseDeviceFlow.d.ts",
@@ -29,7 +29,7 @@
     "@types/inquirer": "^7.3.1",
     "axios": "^0.21.1",
     "chalk": "^4.1.0",
-    "firebase": "^8.2.1",
+    "firebase": "^9.4.0",
     "inquirer": "^7.3.3",
     "ora": "^5.2.0",
     "typescript": "^4.1.3"

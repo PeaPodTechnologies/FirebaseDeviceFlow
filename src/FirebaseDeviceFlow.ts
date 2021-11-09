@@ -1,9 +1,10 @@
-import firebase from "firebase/app";
-import "firebase/auth";
+import { FirebaseApp } from "firebase/app";
+import { getAuth, linkWithCredential, fetchSignInMethodsForEmail, signInWithCredential, OAuthCredential, AuthCredential, OAuthProvider, GoogleAuthProvider, GithubAuthProvider, User, UserCredential } from "firebase/auth";
 import axios, {AxiosResponse, AxiosRequestConfig} from 'axios';
-import ora from 'ora';
+import ora, { Spinner } from 'ora';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
+
 const sleep = (millis : number) => {
     return new Promise(resolve => {
         setTimeout(resolve, millis);
@@ -86,13 +87,13 @@ interface DeviceFlowManager {
     firebaseProvider : any,
     authorizationRequest(clientid : string, scopes : string[]) : Promise<AuthenticationResponse>,
     tokenRequest(authorizationResponse : AuthenticationResponse, clientid : string, clientsecret : string) : Promise<TokenResponse>,
-    firebaseCredential(tokenResponse : TokenResponse) : firebase.auth.OAuthCredential
+    firebaseCredential(tokenResponse : TokenResponse) : OAuthCredential
 }
 
 class GoogleDeviceFlow implements DeviceFlowManager {
     private openid : any;
     readonly name : string = "Google";
-    readonly firebaseProvider = firebase.auth.GoogleAuthProvider;
+    readonly firebaseProvider = GoogleAuthProvider;
     constructor() {}
     /**
      * Polls the Google OAuth Device Flow authorization endpoint for the device code, URL, etc.
@@ -155,17 +156,16 @@ class GoogleDeviceFlow implements DeviceFlowManager {
     /**
      * Builds and returns a Google-provider Firebase credential out of the token step's response.
      * @param {TokenResponse} tokenResponse - The response from the token step.
-     * @returns {firebase.auth.OAuthCredential} The Firebase credential.
+     * @returns {OAuthCredential} The Firebase credential.
      */
-    firebaseCredential(tokenResponse : TokenResponse) : firebase.auth.OAuthCredential{
+    firebaseCredential(tokenResponse : TokenResponse) : OAuthCredential{
         return this.firebaseProvider.credential(tokenResponse.id_token, tokenResponse.access_token);
     }
 }
 
 class GitHubDeviceFlow implements DeviceFlowManager {
-    private openid : any;
     readonly name : string = "GitHub";
-    readonly firebaseProvider = firebase.auth.GithubAuthProvider;
+    readonly firebaseProvider = GithubAuthProvider;
     constructor() {}
     /**
      * Polls the Github OAuth Device Flow authorization endpoint for the device code, URL, etc.
@@ -213,7 +213,7 @@ class GitHubDeviceFlow implements DeviceFlowManager {
     /**
      * Builds and returns a GitHub-provider Firebase credential out of the token step's response.
      * @param {TokenResponse} tokenResponse - The response from the token step.
-     * @returns {firebase.auth.OAuthCredential} The Firebase credential.
+     * @returns {OAuthCredential} The Firebase credential.
      */
     firebaseCredential(tokenResponse : TokenResponse) {
         return this.firebaseProvider.credential(tokenResponse.access_token);
@@ -298,26 +298,19 @@ const defaultSpinner : ora.Spinner = {
  * Prebuilt turn-key Firebase Device Flow UI.
  */
 export class DeviceFlowUI {
-    app : firebase.app.App;
-    options : DeviceFlowUIOptions;
-    loadingSpinner : ora.Spinner;
     /**
      * Constructs a Firebase Device Flow UI instance with your app's OAuth settings.
-     * @param {firebase.default.app.App} app The initialized Firebase app.
+     * @param {FirebaseApp} app The initialized Firebase app.
      * @param {DeviceFlowUIOptions} options Your app's OAuth settings.
-     * @param {ora.Spinner} loadingSpinner The `ora` spinner object (see the [`ora` spinner documentation](https://www.npmjs.com/package/ora#spinner) for details).
+     * @param {Spinner} loadingSpinner The `ora` spinner object (see the [`ora` spinner documentation](https://www.npmjs.com/package/ora#spinner) for details).
      */
-    constructor(app : firebase.app.App, options : DeviceFlowUIOptions, loadingSpinner : ora.Spinner = defaultSpinner) {
-        this.app = app;
-        this.options = options;
-        this.loadingSpinner = loadingSpinner;
-    }
+    constructor(public app : FirebaseApp, public options : DeviceFlowUIOptions, public loadingSpinner : Spinner = defaultSpinner) {}
     /**
      * Signs the user in to your app.
-     * @returns {Promise<firebase.User>} The user.
+     * @returns {Promise<User>} The user.
      **/
-    public signIn = async () : Promise<firebase.User> => {
-        while (this.app.auth().currentUser === null) {
+    public signIn = async () : Promise<User> => {
+        while (getAuth(this.app).currentUser === null) {
             //Select provider
             const provider : TProviderID = (await inquirer.prompt([{
                 type: 'list',
@@ -327,15 +320,15 @@ export class DeviceFlowUI {
             }])).provider;
             await this.signInViaProvider(provider);
         }
-        return (this.app.auth().currentUser as firebase.User);
+        return (getAuth(this.app).currentUser as User);
     }
 
     /**
      * Signs the user in to your app using the given provider.
      * @param {TProviderID} providerid - The ID of the provider to use.
-     * @returns {Promise<firebase.auth.UserCredential>} The user.
+     * @returns {Promise<UserCredential>} The user.
      */
-    private signInViaProvider = async (providerid : TProviderID) : Promise<firebase.auth.UserCredential | undefined> => {
+    private signInViaProvider = async (providerid : TProviderID) : Promise<UserCredential | undefined> => {
         var provider = new ProviderMap[providerid]();
         var loading : ora.Ora;
         loading = ora({
@@ -349,8 +342,10 @@ export class DeviceFlowUI {
         } catch (err: any) {
             if (err.data && err.data.error) {
                 loading.fail('Fetching ' + chalk.bold(provider.name) + ' Device Code & URL Failed! (Code ' + err.status + '-' + err.data.error + ')');
-            } else {
+            } else if(err.status){
                 loading.fail('Fetching ' + chalk.bold(provider.name) + ' Device Code & URL Failed! (Code ' + err.status + ')');
+            } else {
+                loading.fail('Fetching ' + chalk.bold(provider.name) + ' Device Code & URL Failed!');
             }
             await sleep(2000);
             return;
@@ -373,14 +368,16 @@ export class DeviceFlowUI {
             var tokenResponse = await provider.tokenRequest(authResponse, this.options[providerid]?.clientid as string, this.options[providerid]?.clientsecret as string);
 
             loading.succeed(chalk.bold(provider.name) + ' Access Token Recieved!')
-            console.log(tokenResponse);
+            // console.log(tokenResponse);
             await sleep(1000);
         } catch (err: any) {
             //General errors
             if (err.data && err.data.error) {
                 loading.fail(chalk.bold(provider.name) + ' Authorization & Token Fetch Failed! (Code ' + err.status + '-' + err.data.error + ')');
-            } else {
+            } else if(err.status){
                 loading.fail(chalk.bold(provider.name) + ' Authorization & Token Fetch Failed! (Code ' + err.status + ')');
+            } else {
+                loading.fail(chalk.bold(provider.name) + ' Authorization & Token Fetch Failed!');
             }
             await sleep(2000);
             return;
@@ -393,7 +390,7 @@ export class DeviceFlowUI {
                 spinner: this.loadingSpinner,
             }).start();
 
-            const user = await this.app.auth().signInWithCredential(provider.firebaseCredential(tokenResponse));
+            const user = await signInWithCredential(getAuth(this.app), provider.firebaseCredential(tokenResponse));
             loading.succeed('Authenticated Successfully!');
             await sleep(2000);
             return user;
@@ -401,7 +398,7 @@ export class DeviceFlowUI {
             //Different credentials, same email?
             if (err.code == 'auth/account-exists-with-different-credential') {
                 loading.stop();
-                return await this.linkCredToExisting(err.email, provider.firebaseCredential(tokenResponse));
+                return await this.linkCredToExisting(err.customData.email, provider.firebaseCredential(tokenResponse));
             } else {
                 loading.fail(err.message);
                 await sleep(2000);
@@ -413,14 +410,14 @@ export class DeviceFlowUI {
     /**
      * Links a new credential to an existing account.
      * @param {String} email The account's email, by which the default existing method is fetched.
-     * @param {firebase.default.auth.AuthCredential} newCred The new credential.
-     * @return {Promise<firebase.default.User | undefined>} The user, now associated with both credentials.
+     * @param {AuthCredential} newCred The new credential.
+     * @return {Promise<User | undefined>} The user, now associated with both credentials.
      */
-    private linkCredToExisting = async (email : string, newCred : firebase.auth.AuthCredential) : Promise<firebase.auth.UserCredential | undefined> => {
+    private linkCredToExisting = async (email : string, newCred : AuthCredential) : Promise<UserCredential | undefined> => {
         var loading;
 
         //It's implied this works
-        const defaultURL = (await this.app.auth().fetchSignInMethodsForEmail(email))[0];
+        const defaultURL = (await fetchSignInMethodsForEmail(getAuth(this.app), email))[0];
         let defaultMethod : TProviderID | undefined;
         for(const entry of Object.entries(ProviderURLMap)){
             if(entry[1] == defaultURL){
@@ -448,7 +445,7 @@ export class DeviceFlowUI {
 
         //Link em?
         if (link == 'Link') {
-            let user : firebase.auth.UserCredential | undefined;
+            let user : UserCredential | undefined;
             while(!user){
                 console.log("Sign in via " + chalk.bold(defaultMethod) + ':');
                 await sleep(2000);
@@ -462,7 +459,7 @@ export class DeviceFlowUI {
                 text: 'Linking...',
                 spinner: this.loadingSpinner,
             }).start();
-            await user.user.linkWithCredential(newCred);
+            await linkWithCredential(user.user, newCred);
             loading.succeed("Linked " + chalk.bold(defaultMethod) + " Credential to Account!");
             await sleep(1000);
             return user;
@@ -476,7 +473,7 @@ export class DeviceFlowUI {
     public authTests = async () : Promise<void> => {
         for(const providerid of Object.values(ProviderIDMap)){
             if(!Object.keys(this.options).includes(providerid)){
-                continue
+                continue;
             }
             console.log("Testing "+providerid+":");
             var provider = new ProviderMap[providerid]();

@@ -1,5 +1,5 @@
 //SAMPLE TEST CODE
-import firebase from 'firebase/app';
+import { initializeApp } from 'firebase/app';
 import { DeviceFlowUI } from "./dist/FirebaseDeviceFlow";
 import * as fs from 'fs';
 
@@ -42,7 +42,7 @@ if(fs.existsSync('.env')){
     console.log('Environment variable file not found. Assuming variables are set.')
 }
 
-const app = firebase.initializeApp({
+const app = initializeApp({
     apiKey: process.env.FIREBASE_APIKEY,
     authDomain: process.env.FIREBASE_AUTHDOMAIN,
     databaseURL: process.env.FIREBASE_DATABASEURL,
